@@ -54,6 +54,14 @@ public class WorldState_Mine
                stamina >= worldStateDestination.stamina && playerHealth >= worldStateDestination.playerHealth
                && monsterHealth <= worldStateDestination.monsterHealth;
     }
+    
+    // TODO: Merge negativePreconditionsMet and preconditionsMet
+    // WS & NP == 0
+    public bool negativePreconditionsMet(WorldState_Mine worldStateDestination)
+    {
+        // Check the masks
+        return (mWorldStateMask & worldStateDestination.mWorldStateMask) == WorldState_Mask.WS_NONE; 
+    }
 
     // Apply the effects of an action to the current WorldState_Mine
     public WorldState_Mine applyEffects(WorldState_Mine effects, WorldState_Mine negativeEffects)
@@ -91,8 +99,8 @@ public enum WorldState_Mask
     WS_MONSTER_STUNNED = 1 << 11,
     WS_MONSTER_CHARGING = 1 << 12,
     WS_MONSTER_SUPER = 1 << 13,
+    
     WS_WEAPON_EQUIPPED = 1 << 14,
-
     // 00 -> Longsword (bit 15 and 16 are 0)
     // 01 -> Hammer (bit 15 is 1 and bit 16 is 0)
     // 10 -> Lance (bit 15 is 0 and bit 16 is 1)
@@ -112,6 +120,7 @@ public enum WeaponType
     SWORD,
 }
 
+// TODO: Add the weapon to the world?
 public class Weapon
 {
     public WeaponType weaponType;

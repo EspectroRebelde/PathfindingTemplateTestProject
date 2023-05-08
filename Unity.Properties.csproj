@@ -42,29 +42,29 @@
   </PropertyGroup>
   <ItemGroup>
      <None Include="Library\PackageCache\com.unity.entities@1.0.0-exp.12\Unity.Scenes.Editor\Internals\Properties\Unity.Properties.Internals.asmref" />
-     <None Include="Library\PackageCache\com.unity.properties@2.0.0-exp.11\Runtime\Unity.Properties.asmdef" />
-     <Folder Include="Library\PackageCache\com.unity.properties@2.0.0-exp.11\Runtime\PropertyBags\Internal" />
-     <Folder Include="Library\PackageCache\com.unity.properties@2.0.0-exp.11\Runtime" />
-     <Folder Include="Library\PackageCache\com.unity.properties@2.0.0-exp.11\Runtime\PropertyBags" />
-     <Folder Include="Library\PackageCache\com.unity.properties@2.0.0-exp.11\Runtime\SourceGenerator" />
-     <Folder Include="Library\PackageCache\com.unity.properties@2.0.0-exp.11\Runtime\PropertyVisitors\Internal" />
-     <Folder Include="Library\PackageCache\com.unity.properties@2.0.0-exp.11\Runtime\Properties" />
-     <Folder Include="Library\PackageCache\com.unity.properties@2.0.0-exp.11\Runtime\Reflection" />
-     <Folder Include="Library\PackageCache\com.unity.properties@2.0.0-exp.11\Runtime\Algorithms" />
+     <None Include="Library\PackageCache\com.unity.properties@2.1.0-exp.3\Runtime\Unity.Properties.asmdef" />
+     <Folder Include="Library\PackageCache\com.unity.properties@2.1.0-exp.3\Runtime\PropertyBags\Internal" />
+     <Folder Include="Library\PackageCache\com.unity.properties@2.1.0-exp.3\Runtime" />
+     <Folder Include="Library\PackageCache\com.unity.properties@2.1.0-exp.3\Runtime\PropertyBags" />
+     <Folder Include="Library\PackageCache\com.unity.properties@2.1.0-exp.3\Runtime\SourceGenerator" />
+     <Folder Include="Library\PackageCache\com.unity.properties@2.1.0-exp.3\Runtime\PropertyVisitors\Internal" />
+     <Folder Include="Library\PackageCache\com.unity.properties@2.1.0-exp.3\Runtime\Properties" />
+     <Folder Include="Library\PackageCache\com.unity.properties@2.1.0-exp.3\Runtime\Reflection" />
+     <Folder Include="Library\PackageCache\com.unity.properties@2.1.0-exp.3\Runtime\Algorithms" />
      <Folder Include="Library\PackageCache\com.unity.entities@1.0.0-exp.12\Unity.Scenes.Editor\Internals\Properties" />
-     <Folder Include="Library\PackageCache\com.unity.properties@2.0.0-exp.11\Runtime\Utility" />
-     <Folder Include="Library\PackageCache\com.unity.properties@2.0.0-exp.11\Runtime\PropertyVisitors\Adapters" />
-     <Folder Include="Library\PackageCache\com.unity.properties@2.0.0-exp.11\Runtime\PropertyVisitors" />
-     <Folder Include="Library\PackageCache\com.unity.properties@2.0.0-exp.11\Runtime\Properties\Internal" />
-     <Folder Include="Library\PackageCache\com.unity.properties@2.0.0-exp.11\Runtime\Reflection\Internal" />
+     <Folder Include="Library\PackageCache\com.unity.properties@2.1.0-exp.3\Runtime\Utility" />
+     <Folder Include="Library\PackageCache\com.unity.properties@2.1.0-exp.3\Runtime\PropertyVisitors\Adapters" />
+     <Folder Include="Library\PackageCache\com.unity.properties@2.1.0-exp.3\Runtime\PropertyVisitors" />
+     <Folder Include="Library\PackageCache\com.unity.properties@2.1.0-exp.3\Runtime\Properties\Internal" />
+     <Folder Include="Library\PackageCache\com.unity.properties@2.1.0-exp.3\Runtime\Reflection\Internal" />
      <Reference Include="UnityEngine">
-     <HintPath>C:\Program Files\Unity\Hub\Editor\2022.2.0b8\Editor\Data\Managed\UnityEngine\UnityEngine.dll</HintPath>
+     <HintPath>C:\Program Files\Unity\Hub\Editor\2022.2.13f1\Editor\Data\Managed\UnityEngine\UnityEngine.dll</HintPath>
      </Reference>
      <Reference Include="UnityEngine.CoreModule">
-     <HintPath>C:\Program Files\Unity\Hub\Editor\2022.2.0b8\Editor\Data\Managed\UnityEngine\UnityEngine.CoreModule.dll</HintPath>
+     <HintPath>C:\Program Files\Unity\Hub\Editor\2022.2.13f1\Editor\Data\Managed\UnityEngine\UnityEngine.CoreModule.dll</HintPath>
      </Reference>
      <Reference Include="UnityEditor">
-     <HintPath>C:\Program Files\Unity\Hub\Editor\2022.2.0b8\Editor\Data\Managed\UnityEngine\UnityEditor.dll</HintPath>
+     <HintPath>C:\Program Files\Unity\Hub\Editor\2022.2.13f1\Editor\Data\Managed\UnityEngine\UnityEditor.dll</HintPath>
      </Reference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

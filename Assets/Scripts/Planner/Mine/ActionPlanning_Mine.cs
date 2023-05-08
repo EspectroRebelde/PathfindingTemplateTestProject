@@ -12,7 +12,8 @@ public class ActionPlanning_Mine
 
     public string mName;
     /***************************************************************************/
-
+    
+    // TODO: Modify actions for 1-5-10% of dmg so nehaviour tree can do it
     [Flags]
     // Action state of a hunting game like monster hunter
     public enum ActionType

@@ -60,14 +60,16 @@ public class World_Mine : MonoBehaviour
         mActionList = new List<ActionPlanning_Mine>();
         // TODO: Add all actions to the list
         // STATUS
-        mActionList.Add(
+        
+         mActionList.Add(
             new ActionPlanning_Mine(
                 ActionPlanning_Mine.ActionType.ACTION_TYPE_IDLE,
-                new WorldState_Mine(),
-                new WorldState_Mine(),
-                new WorldState_Mine(),
+                new WorldState_Mine(WorldState_Mask.WS_NONE),
+                new WorldState_Mine(WorldState_Mask.WS_NONE),
+                new WorldState_Mine(WorldState_Mask.WS_NONE),
                 0.0f, "Idle")
         );
+         
 
     }
 
