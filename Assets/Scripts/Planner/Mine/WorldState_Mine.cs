@@ -7,13 +7,14 @@ using Vector3 = System.Numerics.Vector3;
 public class WorldState_Mine
 {
     public WorldState_Mask mWorldStateMask;
-    public ActionPlanning.ActionType mActionType;
+    public ActionPlanning_Mine.ActionType mActionType;
     public int stamina;
     public int playerHealth;
     public int monsterHealth;
+    public WeaponType weaponType;
 
     public WorldState_Mine(WorldState_Mask worldStateMask, int stamina = 0, int playerHealth = 0, int monsterHealth = 0,
-        ActionPlanning.ActionType actionType = ActionPlanning.ActionType.ACTION_TYPE_NONE)
+        ActionPlanning_Mine.ActionType actionType = ActionPlanning_Mine.ActionType.ACTION_TYPE_NONE)
     {
         mWorldStateMask = worldStateMask;
         mActionType = actionType;
@@ -119,7 +120,7 @@ public enum WeaponType
     LANCE,
     SWORD,
 }
-
+ 
 // TODO: Add the weapon to the world?
 public class Weapon
 {

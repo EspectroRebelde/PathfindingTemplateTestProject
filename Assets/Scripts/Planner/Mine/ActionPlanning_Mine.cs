@@ -6,6 +6,7 @@ public class ActionPlanning_Mine
 {
     public ActionType mActionType;
     public WorldState_Mine mPreconditions;
+    public WorldState_Mine mNegativePreconditions;
     public WorldState_Mine mEffects;
     public WorldState_Mine mNegativeEffects;
     public float mCost;
@@ -35,7 +36,12 @@ public class ActionPlanning_Mine
         ACTION_TYPE_BLOCK                   = 1 << 11,
         ACTION_TYPE_DODGE                   = 1 << 12,
         
-        ACTION_TYPE_COVER_NONE              = 1 << 13,
+        ACTION_TYPE_TAKE_COVER              = 1 << 13,
+        
+        ACTION_TYPE_EQUIP_WEAPON_LONSWORD   = 1 << 14,
+        ACTION_TYPE_EQUIP_WEAPON_HAMMER     = 1 << 15,
+        ACTION_TYPE_EQUIP_WEAPON_LANCE      = 1 << 16,
+        ACTION_TYPE_EQUIP_WEAPON_SWORD      = 1 << 17,
 
         ACTION_TYPE_ATTACK_WHILE_FLEEING    = (ACTION_TYPE_ATTACK_NORMAL | ACTION_TYPE_ATTACK_SUPER) & ACTION_TYPE_MOVE_TO_TARGET_FAST,
 
@@ -47,11 +53,12 @@ public class ActionPlanning_Mine
 
     /***************************************************************************/
 
-    public ActionPlanning_Mine(ActionType actionType, WorldState_Mine preconditions, WorldState_Mine effects,
-        WorldState_Mine negativeEffects, float cost, string name)
+    public ActionPlanning_Mine(ActionType actionType, WorldState_Mine preconditions, WorldState_Mine negativePreconditions,
+        WorldState_Mine effects, WorldState_Mine negativeEffects, float cost, string name)
     {
         mActionType = actionType;
         mPreconditions = preconditions;
+        mNegativePreconditions = negativePreconditions;
         mEffects = effects;
         mNegativeEffects = negativeEffects;
         mCost = cost;

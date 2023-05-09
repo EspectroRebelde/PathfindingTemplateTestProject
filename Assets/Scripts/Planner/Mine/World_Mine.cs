@@ -67,7 +67,8 @@ public class World_Mine : MonoBehaviour
                 new WorldState_Mine(WorldState_Mask.WS_NONE),
                 new WorldState_Mine(WorldState_Mask.WS_NONE),
                 new WorldState_Mine(WorldState_Mask.WS_NONE),
-                0.0f, "Idle")
+                new WorldState_Mine(WorldState_Mask.WS_NONE),
+                0.0f, "None")
         );
          
 
@@ -84,7 +85,15 @@ public class World_Mine : MonoBehaviour
             if (node.mWorldState.preconditionsMet(action.mPreconditions))
             {
                 // Apply action, effects and negative effects
-                NodePlanning_Mine newNodePlanning = new NodePlanning_Mine(node.mWorldState.applyEffects(action.mEffects, action.mNegativeEffects), action);
+                NodePlanning_Mine newNodePlanning = new NodePlanning_Mine(
+                    action,
+                    node.mWorldState.applyEffects(action.mEffects, action.mNegativeEffects),
+                    action.mActionType,
+                    node.mWorldState.stamina,
+                    node.mWorldState.playerHealth,
+                    node.mWorldState.monsterHealth,
+                    node.mWorldState.weaponType);
+                
                 neighbours.Add(newNodePlanning);
             }
         }

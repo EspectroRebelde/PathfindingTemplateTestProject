@@ -11,13 +11,23 @@ public class NodePlanning_Mine
     public NodePlanning_Mine mParent;
     /***************************************************************************/
 
-    public NodePlanning_Mine(WorldState_Mine worldState, ActionPlanning_Mine actionPlanning)
+    public NodePlanning_Mine(ActionPlanning_Mine actionPlanning,
+        WorldState_Mine worldState,
+        ActionPlanning_Mine.ActionType actionType,
+        int stamina = 0, int playerHealth = 0, int monsterHealth = 0,
+        WeaponType weaponType = WeaponType.NONE)
     {
         mWorldState = worldState;
         MActionPlanning = actionPlanning;
         gCost = 0.0f;
         hCost = 0.0f;
         mParent = null;
+        
+        worldState.mActionType = actionType;
+        worldState.stamina = stamina;
+        worldState.playerHealth = playerHealth;
+        worldState.monsterHealth = monsterHealth;
+        worldState.weaponType = weaponType;
     }
 
     /***************************************************************************/

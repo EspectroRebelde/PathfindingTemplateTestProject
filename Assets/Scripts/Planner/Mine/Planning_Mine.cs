@@ -14,11 +14,8 @@ public class Planning_Mine : MonoBehaviour
     {
         mWorld = GetComponent<World_Mine>();
         UnityEngine.Debug.Log("Planning...");
-
         WorldState_Mine startWorldState = new WorldState_Mine(mWorld.mWorldStateMask, mWorld.mWorldStateHealth, mWorld.mWorldStateStamina);
-        
         WorldState_Mine targetWorldState = new WorldState_Mine(mWorld.mWorldStateMask, mWorld.mWorldStateHealth, mWorld.mWorldStateStamina);
-        
         FindPlan(startWorldState, targetWorldState);
     }
 
@@ -26,14 +23,18 @@ public class Planning_Mine : MonoBehaviour
 
     public List<NodePlanning_Mine> FindPlan(WorldState_Mine startWorldState, WorldState_Mine targetWorldState)
     {
-        CurrentStartNode = new NodePlanning_Mine(startWorldState, null);
-        CurrentTargetNode = new NodePlanning_Mine(targetWorldState, null);
+        CurrentStartNode = new NodePlanning_Mine(null, startWorldState, ActionPlanning_Mine.ActionType.ACTION_TYPE_NONE, startWorldState.stamina,
+            startWorldState.playerHealth, startWorldState.monsterHealth, WeaponType.NONE);
+        CurrentTargetNode = new NodePlanning_Mine(null, targetWorldState, ActionPlanning_Mine.ActionType.ACTION_TYPE_NONE, targetWorldState.stamina,
+            targetWorldState.playerHealth, 0, WeaponType.NONE);
+        
         List<NodePlanning_Mine> openSet = new List<NodePlanning_Mine>();
         HashSet<NodePlanning_Mine> closedSet = new HashSet<NodePlanning_Mine>();
         openSet.Add(CurrentStartNode);
         mWorld.openSet = openSet;
         NodePlanning_Mine node = CurrentStartNode;
-        while (openSet.Count > 0 && ((node.mWorldState.mWorldStateMask & CurrentTargetNode.mWorldState.mWorldStateMask) != CurrentTargetNode.mWorldState.mWorldStateMask))
+        while (openSet.Count > 0 && ((node.mWorldState.mWorldStateMask & CurrentTargetNode.mWorldState.mWorldStateMask) !=
+                                     CurrentTargetNode.mWorldState.mWorldStateMask))
         {
             // Select best node from open list
             node = openSet[0];
