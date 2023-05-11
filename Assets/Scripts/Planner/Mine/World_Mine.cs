@@ -69,8 +69,35 @@ public class World_Mine : MonoBehaviour
                 new WorldState_Mine(WorldState_Mask.WS_NONE),
                 0.0f, "None")
         );
+/*
+         #region ACTION_TYPE_MOVE
+         mActionList.Add(
+             new ActionPlanning_Mine(
+                 ActionPlanning_Mine.ActionType.ACTION_TYPE_MOVE_TO_TARGET_SLOW,
+             )
+         );
          
+        mActionList.Add(
+            new ActionPlanning_Mine(
+                ActionPlanning_Mine.ActionType.ACTION_TYPE_MOVE_TO_TARGET_FAST,
+            )
+        );
 
+        mActionList.Add(
+            new ActionPlanning_Mine(
+                ActionPlanning_Mine.ActionType.ACTION_TYPE_MOVE_TO_TARGET_SNEAK,
+            )
+        );
+        #endregion
+
+        #region ACTION_TYPE_ATTACK
+        mActionList.Add(
+            new ActionPlanning_Mine(
+                ActionPlanning_Mine.ActionType.ACTION_TYPES
+                )
+            );
+        #endregion
+        */
     }
 
     /***************************************************************************/
