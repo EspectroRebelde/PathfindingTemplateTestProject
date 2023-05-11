@@ -11,16 +11,19 @@ public class WorldState_Mine
     public int stamina;
     public int playerHealth;
     public int monsterHealth;
-    public WeaponType weaponType;
+    public Weapon weaponType;
 
-    public WorldState_Mine(WorldState_Mask worldStateMask, int stamina = 0, int playerHealth = 0, int monsterHealth = 0,
+    public WorldState_Mine(WorldState_Mask worldStateMask, 
+        int stamina = 0, int playerHealth = 0, int monsterHealth = 0,
+        Weapon weaponRef = null,
         ActionPlanning_Mine.ActionType actionType = ActionPlanning_Mine.ActionType.ACTION_TYPE_NONE)
     {
         mWorldStateMask = worldStateMask;
-        mActionType = actionType;
+        this.mActionType = actionType;
         this.stamina = stamina;
         this.playerHealth = playerHealth;
         this.monsterHealth = monsterHealth;
+        this.weaponType = weaponRef;
     }
 
     public static bool operator ==(WorldState_Mine worldState1, WorldState_Mine worldState2)
@@ -46,7 +49,7 @@ public class WorldState_Mine
     }
 
     // Compare two WorldState_Mine to check the preconditions
-    public bool preconditionsMet(WorldState_Mine worldStateDestination)
+    private bool preconditionsMet(WorldState_Mine worldStateDestination)
     {
         // Check the masks
         // If there is enough stamina
@@ -58,10 +61,19 @@ public class WorldState_Mine
     
     // TODO: Merge negativePreconditionsMet and preconditionsMet
     // WS & NP == 0
-    public bool negativePreconditionsMet(WorldState_Mine worldStateDestination)
+    private bool negativePreconditionsMet(WorldState_Mine worldStateDestination)
     {
         // Check the masks
-        return (mWorldStateMask & worldStateDestination.mWorldStateMask) == WorldState_Mask.WS_NONE; 
+        // If there is not enough stamina
+        // If there is not enough health
+        return (mWorldStateMask & worldStateDestination.mWorldStateMask) == 0 &&
+               stamina >= worldStateDestination.stamina && playerHealth >= worldStateDestination.playerHealth
+               && monsterHealth <= worldStateDestination.monsterHealth;
+    }
+    
+    public bool checkPreconditions(WorldState_Mine worldStateDestination, WorldState_Mine worldStateNegativeDestination)
+    {
+        return preconditionsMet(worldStateDestination) && negativePreconditionsMet(worldStateNegativeDestination);
     }
 
     // Apply the effects of an action to the current WorldState_Mine

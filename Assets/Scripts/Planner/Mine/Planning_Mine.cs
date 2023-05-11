@@ -24,9 +24,9 @@ public class Planning_Mine : MonoBehaviour
     public List<NodePlanning_Mine> FindPlan(WorldState_Mine startWorldState, WorldState_Mine targetWorldState)
     {
         CurrentStartNode = new NodePlanning_Mine(null, startWorldState, ActionPlanning_Mine.ActionType.ACTION_TYPE_NONE, startWorldState.stamina,
-            startWorldState.playerHealth, startWorldState.monsterHealth, WeaponType.NONE);
+            startWorldState.playerHealth, startWorldState.monsterHealth, null);
         CurrentTargetNode = new NodePlanning_Mine(null, targetWorldState, ActionPlanning_Mine.ActionType.ACTION_TYPE_NONE, targetWorldState.stamina,
-            targetWorldState.playerHealth, 0, WeaponType.NONE);
+            targetWorldState.playerHealth, 0, null);
         
         List<NodePlanning_Mine> openSet = new List<NodePlanning_Mine>();
         HashSet<NodePlanning_Mine> closedSet = new HashSet<NodePlanning_Mine>();

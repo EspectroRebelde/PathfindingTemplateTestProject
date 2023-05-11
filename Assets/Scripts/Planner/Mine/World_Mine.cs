@@ -82,7 +82,7 @@ public class World_Mine : MonoBehaviour
         foreach (ActionPlanning_Mine action in mActionList)
         {
             // If preconditions are met we can apply effects and the new state is valid
-            if (node.mWorldState.preconditionsMet(action.mPreconditions))
+            if (node.mWorldState.checkPreconditions(action.mPreconditions, action.mNegativePreconditions))
             {
                 // Apply action, effects and negative effects
                 NodePlanning_Mine newNodePlanning = new NodePlanning_Mine(
