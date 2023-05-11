@@ -72,6 +72,8 @@ public class WorldState_Mine
         // Change stamina
         // Change health
         // Return the new WorldState_Mine
+        
+        // If action is attack, call WeaponType.Attack()
         WorldState_Mine newWorldState = new WorldState_Mine(mWorldStateMask);
         newWorldState.mWorldStateMask |= effects.mWorldStateMask;
         newWorldState.mWorldStateMask &= ~negativeEffects.mWorldStateMask;
@@ -112,15 +114,17 @@ public enum WorldState_Mask
     WS_WEAPON_TYPE_SWORD = 1 << 15 & 1 << 16,
 }
 
+// A struct called WeaponType that contains the different types of weapons
+// Implements the function Attack for each weapon type
 public enum WeaponType
 {
     NONE,
     LONGSWORD,
     HAMMER,
     LANCE,
-    SWORD,
+    SWORD
 }
- 
+
 // TODO: Add the weapon to the world?
 public class Weapon
 {
@@ -129,6 +133,8 @@ public class Weapon
     public int damageSlash;
     public int damageHit;
     public bool canBlock;
+    public bool canBreak;
+    public bool canSever;
 
     public Weapon(WeaponType weaponType)
     {
@@ -139,24 +145,32 @@ public class Weapon
                 damageSlash = 20;
                 damageHit = 10;
                 canBlock = false;
+                canBreak = false;
+                canSever = true;
                 break;
             case WeaponType.HAMMER:
                 damage = 15;
                 damageSlash = 10;
                 damageHit = 20;
                 canBlock = false;
+                canBreak = true;
+                canSever = false;
                 break;
             case WeaponType.LANCE:
                 damage = 15;
                 damageSlash = 10;
                 damageHit = 10;
                 canBlock = true;
+                canBreak = false;
+                canSever = false;
                 break;
             case WeaponType.SWORD:
                 damage = 15;
                 damageSlash = 15;
                 damageHit = 15;
                 canBlock = false;
+                canBreak = false;
+                canSever = false;
                 break;
             case WeaponType.NONE:
             default:
@@ -168,5 +182,57 @@ public class Weapon
         }
 
         this.weaponType = weaponType;
+    }
+    
+    public int AttackType(ActionPlanning_Mine.ActionType attackType, WorldState_Mask worldStateMask)
+    {
+        switch (attackType)
+        {
+            case ActionPlanning_Mine.ActionType.ACTION_TYPE_ATTACK_NORMAL:
+                return damage;
+            case ActionPlanning_Mine.ActionType.ACTION_TYPE_ATTACK_CHARGING:
+                return damageSlash;
+            case ActionPlanning_Mine.ActionType.ACTION_TYPE_ATTACK_SUPER:
+                return damageHit;
+            default:
+                return 0;
+        }
+    }
+    
+    public int AttackPlace(ActionPlanning_Mine.ActionType attackPlace, WorldState_Mask worldStateMask)
+    {
+        // attackPlace is the attack position
+        // NORMAL_POINT
+        // WEAK_POINT
+        // BREAKABLE_PART
+        // SEVERABLE_PART
+        switch (attackPlace)
+        {
+            case ActionPlanning_Mine.ActionType.ACTION_TYPE_ATTACK_NORMAL_POINT:
+                return damage;
+            case ActionPlanning_Mine.ActionType.ACTION_TYPE_ATTACK_WEAK_POINT:
+                return damage * 2;
+            case ActionPlanning_Mine.ActionType.ACTION_TYPE_ATTACK_BREAKABLE_PART:
+                // Is the part already broken?
+                if ((worldStateMask & WorldState_Mask.WS_MONSTER_PART_BROKEN) == WorldState_Mask.WS_MONSTER_PART_BROKEN)
+                {
+                    return damage;
+                }
+                else
+                {
+                    return damage * 2;
+                }
+            case ActionPlanning_Mine.ActionType.ACTION_TYPE_ATTACK_SEVERABLE_PART:
+                // Is the part already severed?
+                if ((worldStateMask & WorldState_Mask.WS_MONSTER_PART_SEVERED) == WorldState_Mask.WS_MONSTER_PART_SEVERED)
+                {
+                    return damage;
+                }
+                else
+                {
+                    return damage * 2;
+                }
+        }
+        return 0;
     }
 }
