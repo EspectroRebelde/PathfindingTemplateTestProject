@@ -14,8 +14,7 @@ public class World_Mine : MonoBehaviour
     
     // A WorldState_Mine class with the parameters exposed in the inspector
     [BoxGroup("Starting World State")]
-    [ReadOnly]
-    public WorldState_Mask mWorldStateMask;
+    public WorldState_Mask mWorldStateMask = WorldState_Mask.WS_NONE;
     [BoxGroup("Starting World State")]
     public int mWorldStateHealth;
     [BoxGroup("Starting World State")]
