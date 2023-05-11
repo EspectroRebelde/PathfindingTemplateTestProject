@@ -4,6 +4,7 @@ using Sirenix.OdinInspector;
 using UnityEngine;
 using Vector3 = System.Numerics.Vector3;
 
+[Serializable]
 public class WorldState_Mine
 {
     public WorldState_Mask mWorldStateMask;
@@ -137,16 +138,16 @@ public enum WeaponType
     SWORD
 }
 
-// TODO: Add the weapon to the world?
+[Serializable]
 public class Weapon
 {
     public WeaponType weaponType;
-    public int damage;
-    public int damageSlash;
-    public int damageHit;
-    public bool canBlock;
-    public bool canBreak;
-    public bool canSever;
+    private int damage;
+    private int damageSlash;
+    private int damageHit;
+    private bool canBlock;
+    private bool canBreak;
+    private bool canSever;
 
     public Weapon(WeaponType weaponType)
     {
@@ -246,5 +247,20 @@ public class Weapon
                 }
         }
         return 0;
+    }
+    
+    public bool CanBlock()
+    {
+        return canBlock;
+    }
+    
+    public bool CanBreak()
+    {
+        return canBreak;
+    }
+    
+    public bool CanSever()
+    {
+        return canSever;
     }
 }
