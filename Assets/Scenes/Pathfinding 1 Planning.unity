@@ -984,6 +984,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 615c86b9792e4366af8124b0b281aa3b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mWorldStateMask: 0
+  mWorldStateHealth: 0
+  mWorldStateStamina: 0
+  mWorldStateMaskTarget: 0
+  mWorldStateMinumumHealth: 0
+  mWorldStateMinumumStamina: 0
 --- !u!114 &1441451180
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.Collections;
+using Unity.Jobs;
 
 public class Planning_Mine : MonoBehaviour
 {
@@ -127,7 +129,7 @@ public class Planning_Mine : MonoBehaviour
 
     /***************************************************************************/
 
-    private static float GetDistance(NodePlanning_Mine nodeA, NodePlanning_Mine nodeB)
+    private float GetDistance(NodePlanning_Mine nodeA, NodePlanning_Mine nodeB)
     {
         // Distance function
         return nodeB.MActionPlanning.mCost;
@@ -135,11 +137,27 @@ public class Planning_Mine : MonoBehaviour
 
     /***************************************************************************/
 
-    private static float Heuristic(NodePlanning_Mine nodeA, NodePlanning_Mine nodeB)
+    private int Heuristic(NodePlanning_Mine nodeA, NodePlanning_Mine goalNode)
     {
         // Heuristic function
-        return -World.PopulationCount((int)(nodeA.mWorldState.mWorldStateMask | nodeB.mWorldState.mWorldStateMask)) -
-               World.PopulationCount((int)(nodeA.mWorldState.mWorldStateMask & nodeB.mWorldState.mWorldStateMask));
+        // The function weight should be determinated by:
+        // 70% - Monster health (the less health the closer to destination)
+        // 15% - Player health (the more health the better)
+        // 15% - Stamina (the more stamina the better)
+        // NodeB is the target node (the monster health we want to reach, the player health we want to have and the stamina we want to have)
+        // NodeA is the current node (the monster health we have, the player health we have and the stamina we have)
+        // The function should return a value between 0 and 100
+        // 0 means that the node is exactly the same as the target node
+        // 100 means that the node is the opposite of the target node
+        
+        // Monster health
+        int monsterHealthHeuristic = (goalNode.mWorldState.monsterHealth - nodeA.mWorldState.monsterHealth) * 100 / goalNode.mWorldState.monsterHealth;
+        // Player health
+        int playerHealthHeuristic = (nodeA.mWorldState.playerHealth - goalNode.mWorldState.playerHealth) * 100 / nodeA.mWorldState.playerHealth;
+        // Stamina
+        int staminaHeuristic = (nodeA.mWorldState.stamina - goalNode.mWorldState.stamina) * 100 / nodeA.mWorldState.stamina;
+        // Weighted average
+        return (monsterHealthHeuristic * 70 + playerHealthHeuristic * 15 + staminaHeuristic * 15) / 100;
     }
 
     /***************************************************************************/

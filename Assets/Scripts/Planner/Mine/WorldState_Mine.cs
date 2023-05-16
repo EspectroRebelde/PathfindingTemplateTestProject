@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Sirenix.OdinInspector;
 using UnityEngine;
+using UnityEngine.Serialization;
 using Vector3 = System.Numerics.Vector3;
 
 [Serializable]
@@ -12,7 +13,7 @@ public class WorldState_Mine
     public int stamina;
     public int playerHealth;
     public int monsterHealth;
-    public Weapon weaponType;
+    public Weapon weapon;
 
     public WorldState_Mine(WorldState_Mask worldStateMask, 
         int stamina = 0, int playerHealth = 0, int monsterHealth = 0,
@@ -24,7 +25,7 @@ public class WorldState_Mine
         this.stamina = stamina;
         this.playerHealth = playerHealth;
         this.monsterHealth = monsterHealth;
-        this.weaponType = weaponRef;
+        this.weapon = weaponRef;
     }
 
     public static bool operator ==(WorldState_Mine worldState1, WorldState_Mine worldState2)
@@ -60,7 +61,6 @@ public class WorldState_Mine
                && monsterHealth <= worldStateDestination.monsterHealth;
     }
     
-    // TODO: Merge negativePreconditionsMet and preconditionsMet
     // WS & NP == 0
     private bool negativePreconditionsMet(WorldState_Mine worldStateDestination)
     {
@@ -86,8 +86,15 @@ public class WorldState_Mine
         // Change health
         // Return the new WorldState_Mine
         
-        // If action is attack, call WeaponType.Attack()
+        // TODO: If action is attack, call WeaponType.Attack()
         WorldState_Mine newWorldState = new WorldState_Mine(mWorldStateMask);
+        // If ACTION_TYPE_ATTACK (enum flagged) has been set
+        if ((mActionType & ActionPlanning_Mine.ActionType.ACTION_TYPE_ATTACK) == ActionPlanning_Mine.ActionType.ACTION_TYPE_ATTACK)
+        {
+            int dmg = weapon.Attack(mActionType, mWorldStateMask);
+            newWorldState.monsterHealth -= dmg;
+        }
+        
         newWorldState.mWorldStateMask |= effects.mWorldStateMask;
         newWorldState.mWorldStateMask &= ~negativeEffects.mWorldStateMask;
         newWorldState.stamina = stamina + effects.stamina + negativeEffects.stamina;
@@ -246,6 +253,37 @@ public class Weapon
                     return damage * 2;
                 }
         }
+        return 0;
+    }
+
+    public int Attack(ActionPlanning_Mine.ActionType attackMask, WorldState_Mask worldStateMask)
+    {
+        // attackMask is the attack type
+        // NORMAL
+        // CHARGING
+        // SUPER
+        // Check the flag to see which
+        if ((attackMask & ActionPlanning_Mine.ActionType.ACTION_TYPE_ATTACK_NORMAL) == ActionPlanning_Mine.ActionType.ACTION_TYPE_ATTACK_NORMAL)
+        {
+            // Normal attack
+            return AttackType(ActionPlanning_Mine.ActionType.ACTION_TYPE_ATTACK_NORMAL, worldStateMask) * 
+                   AttackPlace(ActionPlanning_Mine.ActionType.ACTION_TYPE_ATTACK_NORMAL_POINT, worldStateMask);
+        }
+
+        if ((attackMask & ActionPlanning_Mine.ActionType.ACTION_TYPE_ATTACK_CHARGING) == ActionPlanning_Mine.ActionType.ACTION_TYPE_ATTACK_CHARGING)
+        {
+            // Charging attack
+            return AttackType(ActionPlanning_Mine.ActionType.ACTION_TYPE_ATTACK_CHARGING, worldStateMask) * 
+                   AttackPlace(ActionPlanning_Mine.ActionType.ACTION_TYPE_ATTACK_WEAK_POINT, worldStateMask);
+        }
+
+        if ((attackMask & ActionPlanning_Mine.ActionType.ACTION_TYPE_ATTACK_SUPER) == ActionPlanning_Mine.ActionType.ACTION_TYPE_ATTACK_SUPER)
+        {
+            // Super attack
+            return AttackType(ActionPlanning_Mine.ActionType.ACTION_TYPE_ATTACK_SUPER, worldStateMask) * 
+                   AttackPlace(ActionPlanning_Mine.ActionType.ACTION_TYPE_ATTACK_BREAKABLE_PART, worldStateMask);
+        }
+
         return 0;
     }
     

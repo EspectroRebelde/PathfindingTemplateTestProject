@@ -32,6 +32,8 @@ public class ActionPlanning_Mine
         ACTION_TYPE_ATTACK_WEAK_POINT       = 1 << 8,
         ACTION_TYPE_ATTACK_SEVERABLE_PART   = 1 << 9,
         ACTION_TYPE_ATTACK_BREAKABLE_PART   = 1 << 10,
+        ACTION_TYPE_ATTACK                  = ACTION_TYPE_ATTACK_NORMAL | ACTION_TYPE_ATTACK_CHARGING | ACTION_TYPE_ATTACK_SUPER,
+
 
         ACTION_TYPE_BLOCK                   = 1 << 11,
         ACTION_TYPE_DODGE                   = 1 << 12,

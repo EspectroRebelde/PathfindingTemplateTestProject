@@ -21,7 +21,6 @@ public class World_Mine : MonoBehaviour
     public int mWorldStateStamina;
     
     [BoxGroup("Ending World State")]
-    //TODO: Validate input for the weapons, it has to be the same weapon on both start and end
     public WorldState_Mask mWorldStateMaskTarget;
     [BoxGroup("Ending World State")]
     public int mWorldStateMinumumHealth;
@@ -57,10 +56,8 @@ public class World_Mine : MonoBehaviour
     void Awake()
     {
         mActionList = new List<ActionPlanning_Mine>();
-        // TODO: Add all actions to the list
-        // STATUS
-        
-         mActionList.Add(
+
+        mActionList.Add(
             new ActionPlanning_Mine(
                 ActionPlanning_Mine.ActionType.ACTION_TYPE_IDLE,
                 new WorldState_Mine(WorldState_Mask.WS_NONE),
@@ -118,7 +115,7 @@ public class World_Mine : MonoBehaviour
                     node.mWorldState.stamina,
                     node.mWorldState.playerHealth,
                     node.mWorldState.monsterHealth,
-                    node.mWorldState.weaponType);
+                    node.mWorldState.weapon);
                 
                 neighbours.Add(newNodePlanning);
             }

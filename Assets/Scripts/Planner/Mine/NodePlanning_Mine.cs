@@ -15,7 +15,7 @@ public class NodePlanning_Mine
         WorldState_Mine worldState,
         ActionPlanning_Mine.ActionType actionType,
         int stamina = 0, int playerHealth = 0, int monsterHealth = 0,
-        Weapon weaponType = null)
+        Weapon weapon = null)
     {
         mWorldState = worldState;
         MActionPlanning = actionPlanning;
@@ -27,7 +27,7 @@ public class NodePlanning_Mine
         worldState.stamina = stamina;
         worldState.playerHealth = playerHealth;
         worldState.monsterHealth = monsterHealth;
-        worldState.weaponType = weaponType;
+        worldState.weapon = weapon;
     }
 
     /***************************************************************************/
