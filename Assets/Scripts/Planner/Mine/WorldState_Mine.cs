@@ -262,35 +262,38 @@ public class WorldState_Mine
 
         #region Attack Activations
 
-        // If the monster isnt Attacking, Charging, Super, Stunned or Fleeing
-        if (((mWorldStateMask & WorldState_Mask.WS_MONSTER_ATTACK) != WorldState_Mask.WS_MONSTER_ATTACK) &&
-            ((mWorldStateMask & WorldState_Mask.WS_MONSTER_CHARGING) != WorldState_Mask.WS_MONSTER_CHARGING) &&
-            ((mWorldStateMask & WorldState_Mask.WS_MONSTER_SUPER) != WorldState_Mask.WS_MONSTER_SUPER) &&
-            ((mWorldStateMask & WorldState_Mask.WS_MONSTER_STUNNED) != WorldState_Mask.WS_MONSTER_STUNNED) &&
-            ((mWorldStateMask & WorldState_Mask.WS_MONSTER_FLEEING) != WorldState_Mask.WS_MONSTER_FLEEING))
+        if ((mWorldStateMask & WorldState_Mask.WS_MONSTER_STUNNED) != WorldState_Mask.WS_MONSTER_STUNNED &&
+            (mWorldStateMask & WorldState_Mask.WS_MONSTER_FLEEING) != WorldState_Mask.WS_MONSTER_FLEEING) 
         {
             // Throw a random number to see if we attack or charge or super
             int random = Random.Range(0, 100);
             
-            // If the random number is lower than the super percentage
-            if (random < superAttackPercentage)
+            // If the monster isnt Attacking, Charging, Super, Stunned or Fleeing
+            if (((mWorldStateMask & WorldState_Mask.WS_MONSTER_ATTACK) != WorldState_Mask.WS_MONSTER_ATTACK) &&
+                ((mWorldStateMask & WorldState_Mask.WS_MONSTER_CHARGING) != WorldState_Mask.WS_MONSTER_CHARGING) &&
+                ((mWorldStateMask & WorldState_Mask.WS_MONSTER_SUPER) != WorldState_Mask.WS_MONSTER_SUPER))
             {
-                // Activate the super state on the wold mask
-                mWorldStateMask |= WorldState_Mask.WS_MONSTER_SUPER;
-                // Activate the aggressive state on the wold mask
-                mWorldStateMask |= WorldState_Mask.WS_MONSTER_AGGRESSIVE;
+                // If the random number is lower than the super percentage
+                if (random < superAttackPercentage)
+                {
+                    // Activate the super state on the wold mask
+                    mWorldStateMask |= WorldState_Mask.WS_MONSTER_SUPER;
+                    // Activate the aggressive state on the wold mask
+                    mWorldStateMask |= WorldState_Mask.WS_MONSTER_AGGRESSIVE;
+                }
+                else if (random < chargePercentage + superAttackPercentage)
+                {
+                    // Activate the charge state on the wold mask
+                    mWorldStateMask |= WorldState_Mask.WS_MONSTER_CHARGING;
+                }
+                else if (random < attackPercentage + chargePercentage + superAttackPercentage)
+                {
+                    // Activate the attack state on the wold mask
+                    mWorldStateMask |= WorldState_Mask.WS_MONSTER_ATTACK;
+                }
+
             }
-            else if (random < chargePercentage + superAttackPercentage)
-            {
-                // Activate the charge state on the wold mask
-                mWorldStateMask |= WorldState_Mask.WS_MONSTER_CHARGING;
-            }
-            else if (random < attackPercentage + chargePercentage + superAttackPercentage)
-            {
-                // Activate the attack state on the wold mask
-                mWorldStateMask |= WorldState_Mask.WS_MONSTER_ATTACK;
-            }
-            
+        
             // If no counter is active, roll the fly counter
             if (chargingCounter.x == 0 && stunCounter.x == 0 && superAttackCounter.x == 0)
             {
@@ -300,7 +303,6 @@ public class WorldState_Mine
                     mWorldStateMask |= WorldState_Mask.WS_MONSTER_FLYING;
                 }
             }
-
         }
 
         #endregion
