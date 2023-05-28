@@ -114,8 +114,9 @@ public class World_Mine : MonoBehaviour
                     action.mActionType,
                     node.mWorldState.stamina,
                     node.mWorldState.playerHealth,
-                    node.mWorldState.monsterHealth,
-                    node.mWorldState.weapon);
+                    node.mWorldState.monsterCurrentHealth,
+                    node.mWorldState.weapon,
+                    node.mWorldState.monsterHealth);
                 
                 neighbours.Add(newNodePlanning);
             }

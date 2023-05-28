@@ -13,31 +13,36 @@ public class WorldState_Mine
     public int stamina;
     public int playerHealth;
     public int monsterHealth;
+    public int monsterCurrentHealth;
     public Weapon weapon;
+    
+    public float stunCount = .25f;
 
     public WorldState_Mine(WorldState_Mask worldStateMask, 
-        int stamina = 0, int playerHealth = 0, int monsterHealth = 0,
+        int stamina = 0, int playerHealth = 0, int monsterCurrentHealth = 0,
         Weapon weaponRef = null,
-        ActionPlanning_Mine.ActionType actionType = ActionPlanning_Mine.ActionType.ACTION_TYPE_NONE)
+        ActionPlanning_Mine.ActionType actionType = ActionPlanning_Mine.ActionType.ACTION_TYPE_NONE, 
+        int monsterHealth = 0)
     {
         mWorldStateMask = worldStateMask;
         this.mActionType = actionType;
         this.stamina = stamina;
         this.playerHealth = playerHealth;
-        this.monsterHealth = monsterHealth;
+        this.monsterHealth = monsterCurrentHealth > monsterHealth ? monsterCurrentHealth : monsterHealth;
+        this.monsterCurrentHealth = monsterCurrentHealth;
         this.weapon = weaponRef;
     }
 
     public static bool operator ==(WorldState_Mine worldState1, WorldState_Mine worldState2)
     {
         return worldState1.mWorldStateMask == worldState2.mWorldStateMask && worldState1.stamina == worldState2.stamina &&
-               worldState1.playerHealth == worldState2.playerHealth && worldState1.monsterHealth == worldState2.monsterHealth;
+               worldState1.playerHealth == worldState2.playerHealth && worldState1.monsterCurrentHealth == worldState2.monsterCurrentHealth;
     }
 
     public static bool operator !=(WorldState_Mine worldState1, WorldState_Mine worldState2)
     {
         return worldState1.mWorldStateMask != worldState2.mWorldStateMask || worldState1.stamina != worldState2.stamina ||
-               worldState1.playerHealth != worldState2.playerHealth || worldState1.monsterHealth != worldState2.monsterHealth;
+               worldState1.playerHealth != worldState2.playerHealth || worldState1.monsterCurrentHealth != worldState2.monsterCurrentHealth;
     }
 
     public static bool FinalStateCheck(WorldState_Mine worldStateCurrent, WorldState_Mine worldStateDestination)
@@ -47,7 +52,7 @@ public class WorldState_Mine
         // If the health is greater than the destination
         return (worldStateCurrent.mWorldStateMask & worldStateDestination.mWorldStateMask) == worldStateDestination.mWorldStateMask &&
                worldStateCurrent.stamina >= worldStateDestination.stamina && worldStateCurrent.playerHealth >= worldStateDestination.playerHealth
-               && worldStateCurrent.monsterHealth <= worldStateDestination.monsterHealth;
+               && worldStateCurrent.monsterCurrentHealth <= worldStateDestination.monsterCurrentHealth;
     }
 
     // Compare two WorldState_Mine to check the preconditions
@@ -58,7 +63,7 @@ public class WorldState_Mine
         // If there is enough health
         return (mWorldStateMask & worldStateDestination.mWorldStateMask) == worldStateDestination.mWorldStateMask &&
                stamina >= worldStateDestination.stamina && playerHealth >= worldStateDestination.playerHealth
-               && monsterHealth <= worldStateDestination.monsterHealth;
+               && monsterCurrentHealth <= worldStateDestination.monsterCurrentHealth;
     }
     
     // WS & NP == 0
@@ -69,7 +74,7 @@ public class WorldState_Mine
         // If there is not enough health
         return (mWorldStateMask & worldStateDestination.mWorldStateMask) == 0 &&
                stamina >= worldStateDestination.stamina && playerHealth >= worldStateDestination.playerHealth
-               && monsterHealth <= worldStateDestination.monsterHealth;
+               && monsterCurrentHealth <= worldStateDestination.monsterCurrentHealth;
     }
     
     public bool checkPreconditions(WorldState_Mine worldStateDestination, WorldState_Mine worldStateNegativeDestination)
@@ -85,8 +90,6 @@ public class WorldState_Mine
         // Change stamina
         // Change health
         // Return the new WorldState_Mine
-        
-        // TODO: If action is attack, call WeaponType.Attack()
         WorldState_Mine newWorldState = new WorldState_Mine(mWorldStateMask);
         // If ACTION_TYPE_ATTACK (enum flagged) has been set
         if ((mActionType & ActionPlanning_Mine.ActionType.ACTION_TYPE_ATTACK) == ActionPlanning_Mine.ActionType.ACTION_TYPE_ATTACK)
@@ -95,12 +98,19 @@ public class WorldState_Mine
             newWorldState.monsterHealth -= dmg;
         }
         
+        RandomThrows();
+        
         newWorldState.mWorldStateMask |= effects.mWorldStateMask;
         newWorldState.mWorldStateMask &= ~negativeEffects.mWorldStateMask;
         newWorldState.stamina = stamina + effects.stamina + negativeEffects.stamina;
         newWorldState.playerHealth = playerHealth + effects.playerHealth + negativeEffects.playerHealth;
         newWorldState.monsterHealth = monsterHealth + effects.monsterHealth + negativeEffects.monsterHealth;
         return newWorldState;
+    }
+
+    private void RandomThrows()
+    {
+        // If the monster's health is lower than 
     }
 }
 
