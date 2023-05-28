@@ -6,6 +6,7 @@ using System.Linq;
 #if UNITY_EDITOR
 using Sirenix.OdinInspector;
 #endif
+
 public class World_Mine : MonoBehaviour
 {
     public List<NodePlanning_Mine> openSet;
@@ -19,6 +20,8 @@ public class World_Mine : MonoBehaviour
     public int mWorldStateHealth;
     [BoxGroup("Starting World State")]
     public int mWorldStateStamina;
+    [BoxGroup("Starting World State")] 
+    public int mWorldStateMonsterHealth;
     
     [BoxGroup("Ending World State")]
     public WorldState_Mask mWorldStateMaskTarget;

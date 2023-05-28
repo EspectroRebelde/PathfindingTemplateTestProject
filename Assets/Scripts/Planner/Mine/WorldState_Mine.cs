@@ -313,7 +313,7 @@ public class WorldState_Mine
         {
             // Activate the dead state on the wold mask
             mWorldStateMask |= WorldState_Mask.WS_MONSTER_DEAD;
-        }
+        }   
 
         #endregion
 
