@@ -20,7 +20,7 @@ public class Planning_Mine : MonoBehaviour
         mWorld = GetComponent<World_Mine>();
         UnityEngine.Debug.Log("Planning...");
         WorldState_Mine startWorldState = new WorldState_Mine(mWorld.mWorldStateMask, mWorld.mWorldStateHealth, mWorld.mWorldStateStamina, mWorld.mWorldStateMonsterHealth);
-        WorldState_Mine targetWorldState = new WorldState_Mine(mWorld.mWorldStateMask, mWorld.mWorldStateHealth, mWorld.mWorldStateStamina);
+        WorldState_Mine targetWorldState = new WorldState_Mine(mWorld.mWorldStateMaskTarget, mWorld.mWorldStateMinumumHealth, mWorld.mWorldStateMinumumStamina);
         FindPlan(startWorldState, targetWorldState);
     }
 

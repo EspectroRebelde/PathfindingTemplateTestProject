@@ -324,33 +324,33 @@ public class WorldState_Mine
 public enum WorldState_Mask
 {
     // Generic
-    WS_NONE = 0,
-    WS_MONSTER_IN_FOV = 1 << 6,
-    WS_MONSTER_IN_RANGE = 1 << 7,
-    WS_MONSTER_DEAD = 0b1,
+    WS_NONE = 0, // NADA
+    WS_MONSTER_IN_FOV = 1 << 6, // A VISTA
+    WS_MONSTER_IN_RANGE = 1 << 7, // A RANGO
+    WS_MONSTER_DEAD = 0b1, // MUERTO
     // Status
-    WS_MONSTER_INJURED = 0x8,
-    WS_MONSTER_PART_SEVERED = 0x10,
-    WS_MONSTER_PART_BROKEN = 1 << 5,
+    WS_MONSTER_INJURED = 0x8, // HERIDO
+    WS_MONSTER_PART_SEVERED = 0x10, // PARTE SECCIONADA
+    WS_MONSTER_PART_BROKEN = 1 << 5, // PARTE ROTA
     // Managed
-    WS_MONSTER_FLEEING = 0b10, // Activation & Deactivation
-    WS_MONSTER_ATTACK = 0x4, // Deactivation & Activation
-    WS_MONSTER_FLYING = 1 << 8, // Deactivation & Activation
-    WS_MONSTER_AGGRESSIVE = 1 << 9, // Activation & Deactivation
-    WS_MONSTER_SLEEPING = 1 << 10, // Activation & Deactivation
-    WS_MONSTER_STUNNED = 1 << 11, // Activation & Deactivation
-    WS_MONSTER_CHARGING = 1 << 12, // Deactivation & Activation
-    WS_MONSTER_SUPER = 1 << 13, // Deactivation & Activation
+    WS_MONSTER_FLEEING = 0b10, // Activation & Deactivation // HUYENDO
+    WS_MONSTER_ATTACK = 0x4, // Deactivation & Activation // ATACANDO
+    WS_MONSTER_FLYING = 1 << 8, // Deactivation & Activation // VOLANDO
+    WS_MONSTER_AGGRESSIVE = 1 << 9, // Activation & Deactivation // AGRESIVO
+    WS_MONSTER_SLEEPING = 1 << 10, // Activation & Deactivation // DURMIENDO
+    WS_MONSTER_STUNNED = 1 << 11, // Activation & Deactivation // ATURDIDO
+    WS_MONSTER_CHARGING = 1 << 12, // Deactivation & Activation // CARGANDO
+    WS_MONSTER_SUPER = 1 << 13, // Deactivation & Activation // SUPER
     // Weapons
-    WS_WEAPON_EQUIPPED = 1 << 14,
+    WS_WEAPON_EQUIPPED = 1 << 14, // EQUIPADO
     // 00 -> Longsword (bit 15 and 16 are 0)
     // 01 -> Hammer (bit 15 is 1 and bit 16 is 0)
     // 10 -> Lance (bit 15 is 0 and bit 16 is 1)
     // 11 -> Sword (bit 15 and 16 are 1)
-    WS_WEAPON_TYPE_LONGSWORD = ~(1 << 15 | 1 << 16),
-    WS_WEAPON_TYPE_HAMMER = 1 << 15 & ~(1 << 16),
-    WS_WEAPON_TYPE_LANCE = ~(1 << 15) & 1 << 16,
-    WS_WEAPON_TYPE_SWORD = 1 << 15 & 1 << 16,
+    WS_WEAPON_TYPE_LONGSWORD = ~(1 << 15 | 1 << 16), // EQUIPADA_LARGA_ESPADA
+    WS_WEAPON_TYPE_HAMMER = 1 << 15 & ~(1 << 16), // EQUIPADA_MARTILLO
+    WS_WEAPON_TYPE_LANCE = ~(1 << 15) & 1 << 16, // EQUIPADA_LANZA
+    WS_WEAPON_TYPE_SWORD = 1 << 15 & 1 << 16, // EQUIPADA_ESPADA
 }
 
 // A struct called WeaponType that contains the different types of weapons
