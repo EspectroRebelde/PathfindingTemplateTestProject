@@ -3,6 +3,7 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Random = UnityEngine.Random;
 #if UNITY_EDITOR
 using Sirenix.OdinInspector;
 #endif
@@ -57,18 +58,18 @@ public class World_Mine : MonoBehaviour
     /***************************************************************************/
 
     void Awake()
-    {
+    {   
         mActionList = new List<ActionPlanning_Mine>();
 
-        mActionList.Add(
+         mActionList.Add(
             new ActionPlanning_Mine(
                 ActionPlanning_Mine.ActionType.ACTION_TYPE_IDLE,
-                new WorldState_Mine(WorldState_Mask.WS_NONE),
+                new WorldState_Mine(WorldState_Mask.WS_WEAPON_EQUIPPED),
                 new WorldState_Mine(WorldState_Mask.WS_NONE),
                 new WorldState_Mine(WorldState_Mask.WS_NONE),
                 new WorldState_Mine(WorldState_Mask.WS_NONE),
                 0.0f, "None")
-        );
+         );
          
          int staminaCost = 0;
          #region ACTION_TYPE_MOVE
@@ -76,7 +77,7 @@ public class World_Mine : MonoBehaviour
          mActionList.Add(
              new ActionPlanning_Mine(
                  ActionPlanning_Mine.ActionType.ACTION_TYPE_MOVE_TO_TARGET_SLOW,
-                    new WorldState_Mine(WorldState_Mask.WS_MONSTER_SLEEPING | WorldState_Mask.WS_MONSTER_IN_RANGE, staminaCost),
+                    new WorldState_Mine(WorldState_Mask.WS_WEAPON_EQUIPPED, staminaCost),
                  new WorldState_Mine(WorldState_Mask.WS_MONSTER_FLYING),
                     new WorldState_Mine(WorldState_Mask.WS_NONE),
                  new WorldState_Mine(WorldState_Mask.WS_NONE, -staminaCost),
@@ -88,8 +89,7 @@ public class World_Mine : MonoBehaviour
          mActionList.Add(
              new ActionPlanning_Mine(
                  ActionPlanning_Mine.ActionType.ACTION_TYPE_MOVE_TO_TARGET_FAST,
-                 new WorldState_Mine(WorldState_Mask.WS_MONSTER_STUNNED | WorldState_Mask.WS_MONSTER_IN_FOV,
-                     staminaCost),
+                 new WorldState_Mine(WorldState_Mask.WS_WEAPON_EQUIPPED, staminaCost),
                  new WorldState_Mine(WorldState_Mask.WS_MONSTER_FLYING | WorldState_Mask.WS_MONSTER_CHARGING),
                  new WorldState_Mine(WorldState_Mask.WS_NONE),
                  new WorldState_Mine(WorldState_Mask.WS_NONE, -staminaCost),
@@ -97,16 +97,16 @@ public class World_Mine : MonoBehaviour
          );
         
          staminaCost = 5;
-        mActionList.Add(
+         mActionList.Add(
             new ActionPlanning_Mine(
                 ActionPlanning_Mine.ActionType.ACTION_TYPE_MOVE_TO_TARGET_SNEAK,
-                new WorldState_Mine(WorldState_Mask.WS_MONSTER_SLEEPING | WorldState_Mask.WS_MONSTER_IN_RANGE, staminaCost),
+                new WorldState_Mine(WorldState_Mask.WS_MONSTER_IN_FOV | WorldState_Mask.WS_WEAPON_EQUIPPED, staminaCost),
                 new WorldState_Mine(WorldState_Mask.WS_MONSTER_FLYING),
                 new WorldState_Mine(WorldState_Mask.WS_NONE),
                 new WorldState_Mine(WorldState_Mask.WS_NONE, -staminaCost),
                 0.0f, "Move Sneak"
                 )
-        );
+         );
         #endregion
 
         #region ACTION_TYPE_ATTACK
@@ -114,7 +114,7 @@ public class World_Mine : MonoBehaviour
         mActionList.Add(
             new ActionPlanning_Mine(
                 ActionPlanning_Mine.ActionType.ACTION_TYPE_ATTACK_NORMAL,
-                new WorldState_Mine(WorldState_Mask.WS_MONSTER_IN_RANGE, staminaCost),
+                new WorldState_Mine(WorldState_Mask.WS_MONSTER_IN_RANGE | WorldState_Mask.WS_WEAPON_EQUIPPED, staminaCost),
                 new WorldState_Mine(WorldState_Mask.WS_MONSTER_FLYING),
                 new WorldState_Mine(WorldState_Mask.WS_NONE),
                 new WorldState_Mine(WorldState_Mask.WS_NONE, -staminaCost),
@@ -126,7 +126,7 @@ public class World_Mine : MonoBehaviour
         mActionList.Add(
             new ActionPlanning_Mine(
                 ActionPlanning_Mine.ActionType.ACTION_TYPE_ATTACK_CHARGING,
-                new WorldState_Mine(WorldState_Mask.WS_MONSTER_STUNNED, staminaCost),
+                new WorldState_Mine(WorldState_Mask.WS_MONSTER_STUNNED | WorldState_Mask.WS_WEAPON_EQUIPPED, staminaCost),
                 new WorldState_Mine(WorldState_Mask.WS_MONSTER_FLYING),
                 new WorldState_Mine(WorldState_Mask.WS_NONE),
                 new WorldState_Mine(WorldState_Mask.WS_NONE, -staminaCost),
@@ -138,7 +138,7 @@ public class World_Mine : MonoBehaviour
         mActionList.Add(
             new ActionPlanning_Mine(
                 ActionPlanning_Mine.ActionType.ACTION_TYPE_ATTACK_SUPER,
-                new WorldState_Mine(WorldState_Mask.WS_MONSTER_STUNNED, staminaCost),
+                new WorldState_Mine(WorldState_Mask.WS_MONSTER_STUNNED | WorldState_Mask.WS_WEAPON_EQUIPPED, staminaCost),
                 new WorldState_Mine(WorldState_Mask.WS_MONSTER_FLYING),
                 new WorldState_Mine(WorldState_Mask.WS_NONE),
                 new WorldState_Mine(WorldState_Mask.WS_NONE, -staminaCost),
@@ -150,7 +150,7 @@ public class World_Mine : MonoBehaviour
         mActionList.Add(
             new ActionPlanning_Mine(
                 ActionPlanning_Mine.ActionType.ACTION_TYPE_ATTACK_NORMAL_POINT,
-                new WorldState_Mine(WorldState_Mask.WS_MONSTER_IN_RANGE, staminaCost),
+                new WorldState_Mine(WorldState_Mask.WS_MONSTER_IN_RANGE | WorldState_Mask.WS_WEAPON_EQUIPPED, staminaCost),
                 new WorldState_Mine(WorldState_Mask.WS_MONSTER_FLYING),
                 new WorldState_Mine(WorldState_Mask.WS_NONE),
                 new WorldState_Mine(WorldState_Mask.WS_NONE, -staminaCost),
@@ -162,7 +162,7 @@ public class World_Mine : MonoBehaviour
         mActionList.Add(
             new ActionPlanning_Mine(
                 ActionPlanning_Mine.ActionType.ACTION_TYPE_ATTACK_WEAK_POINT,
-                new WorldState_Mine(WorldState_Mask.WS_MONSTER_IN_RANGE | WorldState_Mask.WS_MONSTER_STUNNED, staminaCost),
+                new WorldState_Mine(WorldState_Mask.WS_MONSTER_IN_RANGE | WorldState_Mask.WS_MONSTER_STUNNED | WorldState_Mask.WS_WEAPON_EQUIPPED, staminaCost),
                 new WorldState_Mine(WorldState_Mask.WS_MONSTER_FLYING),
                 new WorldState_Mine(WorldState_Mask.WS_NONE),
                 new WorldState_Mine(WorldState_Mask.WS_NONE, -staminaCost),
@@ -174,7 +174,7 @@ public class World_Mine : MonoBehaviour
         mActionList.Add(
             new ActionPlanning_Mine(
                 ActionPlanning_Mine.ActionType.ACTION_TYPE_ATTACK_SEVERABLE_PART,
-                new WorldState_Mine(WorldState_Mask.WS_MONSTER_PART_BROKEN | WorldState_Mask.WS_MONSTER_AGGRESSIVE, staminaCost),
+                new WorldState_Mine(WorldState_Mask.WS_MONSTER_PART_BROKEN | WorldState_Mask.WS_MONSTER_AGGRESSIVE | WorldState_Mask.WS_WEAPON_EQUIPPED, staminaCost),
                 new WorldState_Mine(WorldState_Mask.WS_MONSTER_FLYING),
                 new WorldState_Mine(WorldState_Mask.WS_MONSTER_INJURED),
                 new WorldState_Mine(WorldState_Mask.WS_NONE, -staminaCost),
@@ -186,7 +186,7 @@ public class World_Mine : MonoBehaviour
         mActionList.Add(
             new ActionPlanning_Mine(
                 ActionPlanning_Mine.ActionType.ACTION_TYPE_ATTACK_BREAKABLE_PART,
-                new WorldState_Mine(WorldState_Mask.WS_MONSTER_STUNNED | WorldState_Mask.WS_MONSTER_AGGRESSIVE, staminaCost),
+                new WorldState_Mine(WorldState_Mask.WS_MONSTER_STUNNED | WorldState_Mask.WS_MONSTER_AGGRESSIVE | WorldState_Mask.WS_WEAPON_EQUIPPED, staminaCost),
                 new WorldState_Mine(WorldState_Mask.WS_MONSTER_FLYING),
                 new WorldState_Mine(WorldState_Mask.WS_NONE),
                 new WorldState_Mine(WorldState_Mask.WS_NONE, -staminaCost),
@@ -203,7 +203,7 @@ public class World_Mine : MonoBehaviour
                 new WorldState_Mine(WorldState_Mask.WS_MONSTER_IN_RANGE | WorldState_Mask.WS_WEAPON_EQUIPPED, staminaCost),
                 new WorldState_Mine(WorldState_Mask.WS_MONSTER_FLYING),
                 new WorldState_Mine(WorldState_Mask.WS_NONE),
-                new WorldState_Mine(WorldState_Mask.WS_WEAPON_EQUIPPED, -staminaCost),
+                new WorldState_Mine(WorldState_Mask.WS_NONE, -staminaCost),
                 0.0f, "Block"
             )
         );
@@ -212,10 +212,10 @@ public class World_Mine : MonoBehaviour
         mActionList.Add(
             new ActionPlanning_Mine(
                 ActionPlanning_Mine.ActionType.ACTION_TYPE_DODGE,
-                new WorldState_Mine(WorldState_Mask.WS_MONSTER_IN_RANGE | WorldState_Mask.WS_MONSTER_INJURED, staminaCost),
+                new WorldState_Mine(WorldState_Mask.WS_MONSTER_IN_RANGE | WorldState_Mask.WS_MONSTER_INJURED | WorldState_Mask.WS_WEAPON_EQUIPPED, staminaCost),
                 new WorldState_Mine(WorldState_Mask.WS_MONSTER_FLYING),
                 new WorldState_Mine(WorldState_Mask.WS_NONE),
-                new WorldState_Mine(WorldState_Mask.WS_WEAPON_EQUIPPED, -staminaCost),
+                new WorldState_Mine(WorldState_Mask.WS_NONE, -staminaCost),
                 0.0f, "Dodge"
             )
         );
@@ -224,10 +224,10 @@ public class World_Mine : MonoBehaviour
         mActionList.Add(
             new ActionPlanning_Mine(
                 ActionPlanning_Mine.ActionType.ACTION_TYPE_TAKE_COVER,
-                new WorldState_Mine(WorldState_Mask.WS_MONSTER_IN_FOV | WorldState_Mask.WS_MONSTER_PART_BROKEN, staminaCost),
+                new WorldState_Mine(WorldState_Mask.WS_MONSTER_IN_FOV | WorldState_Mask.WS_MONSTER_PART_BROKEN | WorldState_Mask.WS_WEAPON_EQUIPPED, staminaCost),
                 new WorldState_Mine(WorldState_Mask.WS_MONSTER_FLYING),
                 new WorldState_Mine(WorldState_Mask.WS_NONE),
-                new WorldState_Mine(WorldState_Mask.WS_WEAPON_EQUIPPED, -staminaCost),
+                new WorldState_Mine(WorldState_Mask.WS_NONE, -staminaCost),
                 0.0f, "Take Cover"
             )
         );
@@ -239,7 +239,7 @@ public class World_Mine : MonoBehaviour
                 ActionPlanning_Mine.ActionType.ACTION_TYPE_EQUIP_WEAPON_LONSWORD,
                 new WorldState_Mine(WorldState_Mask.WS_NONE),
                 new WorldState_Mine(WorldState_Mask.WS_WEAPON_EQUIPPED),
-                new WorldState_Mine(WorldState_Mask.WS_WEAPON_TYPE_LONGSWORD),
+                new WorldState_Mine(WorldState_Mask.WS_WEAPON_TYPE_LONGSWORD | WorldState_Mask.WS_WEAPON_EQUIPPED),
                 new WorldState_Mine(WorldState_Mask.WS_NONE),
                 0.0f, "Equip Weapon Longsword"
             )
@@ -250,7 +250,7 @@ public class World_Mine : MonoBehaviour
                 ActionPlanning_Mine.ActionType.ACTION_TYPE_EQUIP_WEAPON_HAMMER,
                 new WorldState_Mine(WorldState_Mask.WS_NONE),
                 new WorldState_Mine(WorldState_Mask.WS_WEAPON_EQUIPPED),
-                new WorldState_Mine(WorldState_Mask.WS_WEAPON_TYPE_HAMMER),
+                new WorldState_Mine(WorldState_Mask.WS_WEAPON_TYPE_HAMMER | WorldState_Mask.WS_WEAPON_EQUIPPED),
                 new WorldState_Mine(WorldState_Mask.WS_NONE),
                 0.0f, "Equip Weapon Hammer"
             )
@@ -261,7 +261,7 @@ public class World_Mine : MonoBehaviour
                 ActionPlanning_Mine.ActionType.ACTION_TYPE_EQUIP_WEAPON_LANCE,
                 new WorldState_Mine(WorldState_Mask.WS_NONE),
                 new WorldState_Mine(WorldState_Mask.WS_WEAPON_EQUIPPED),
-                new WorldState_Mine(WorldState_Mask.WS_WEAPON_TYPE_LANCE),
+                new WorldState_Mine(WorldState_Mask.WS_WEAPON_TYPE_LANCE | WorldState_Mask.WS_WEAPON_EQUIPPED),
                 new WorldState_Mine(WorldState_Mask.WS_NONE),
                 0.0f, "Equip Weapon Lance"
             )
@@ -272,7 +272,7 @@ public class World_Mine : MonoBehaviour
                 ActionPlanning_Mine.ActionType.ACTION_TYPE_EQUIP_WEAPON_SWORD,
                 new WorldState_Mine(WorldState_Mask.WS_NONE),
                 new WorldState_Mine(WorldState_Mask.WS_WEAPON_EQUIPPED),
-                new WorldState_Mine(WorldState_Mask.WS_WEAPON_TYPE_SWORD),
+                new WorldState_Mine(WorldState_Mask.WS_WEAPON_TYPE_SWORD | WorldState_Mask.WS_WEAPON_EQUIPPED),
                 new WorldState_Mine(WorldState_Mask.WS_NONE),
                 0.0f, "Equip Weapon Sword"
             )
@@ -287,7 +287,7 @@ public class World_Mine : MonoBehaviour
                 new WorldState_Mine(WorldState_Mask.WS_MONSTER_FLEEING | WorldState_Mask.WS_MONSTER_IN_RANGE | WorldState_Mask.WS_WEAPON_EQUIPPED, staminaCost),
                 new WorldState_Mine(WorldState_Mask.WS_MONSTER_FLYING),
                 new WorldState_Mine(WorldState_Mask.WS_MONSTER_FLEEING),
-                new WorldState_Mine(WorldState_Mask.WS_WEAPON_EQUIPPED, -staminaCost),
+                new WorldState_Mine(WorldState_Mask.WS_NONE, -staminaCost),
                 0.0f, "Attack While Fleeing"
             )
         );
@@ -299,7 +299,7 @@ public class World_Mine : MonoBehaviour
                 new WorldState_Mine(WorldState_Mask.WS_MONSTER_INJURED | WorldState_Mask.WS_MONSTER_IN_RANGE | WorldState_Mask.WS_WEAPON_EQUIPPED, staminaCost),
                 new WorldState_Mine(WorldState_Mask.WS_MONSTER_FLYING),
                 new WorldState_Mine(WorldState_Mask.WS_MONSTER_INJURED),
-                new WorldState_Mine(WorldState_Mask.WS_WEAPON_EQUIPPED, -staminaCost),
+                new WorldState_Mine(WorldState_Mask.WS_NONE, -staminaCost),
                 0.0f, "Attack While Injured"
             )
         );
@@ -311,7 +311,7 @@ public class World_Mine : MonoBehaviour
                 new WorldState_Mine(WorldState_Mask.WS_MONSTER_STUNNED | WorldState_Mask.WS_MONSTER_IN_RANGE | WorldState_Mask.WS_WEAPON_EQUIPPED, staminaCost),
                 new WorldState_Mine(WorldState_Mask.WS_MONSTER_FLYING),
                 new WorldState_Mine(WorldState_Mask.WS_MONSTER_STUNNED),
-                new WorldState_Mine(WorldState_Mask.WS_WEAPON_EQUIPPED, -staminaCost),
+                new WorldState_Mine(WorldState_Mask.WS_NONE, -staminaCost),
                 0.0f, "Attack While Stunned"
             )
         );
@@ -323,7 +323,7 @@ public class World_Mine : MonoBehaviour
                 new WorldState_Mine(WorldState_Mask.WS_MONSTER_SLEEPING | WorldState_Mask.WS_MONSTER_IN_RANGE | WorldState_Mask.WS_WEAPON_EQUIPPED, staminaCost),
                 new WorldState_Mine(WorldState_Mask.WS_MONSTER_FLYING),
                 new WorldState_Mine(WorldState_Mask.WS_MONSTER_SLEEPING),
-                new WorldState_Mine(WorldState_Mask.WS_WEAPON_EQUIPPED, -staminaCost),
+                new WorldState_Mine(WorldState_Mask.WS_NONE, -staminaCost),
                 0.0f, "Attack While Sleeping"
             )
         );
@@ -334,6 +334,7 @@ public class World_Mine : MonoBehaviour
 
     public List<NodePlanning_Mine> GetNeighbours(NodePlanning_Mine node)
     {
+        var randomValueBetween0100 = Random.Range(0, 100);
         List<NodePlanning_Mine> neighbours = new List<NodePlanning_Mine>();
         foreach (ActionPlanning_Mine action in mActionList)
         {
@@ -343,7 +344,7 @@ public class World_Mine : MonoBehaviour
                 // Apply action, effects and negative effects
                 NodePlanning_Mine newNodePlanning = new NodePlanning_Mine(
                     action,
-                    node.mWorldState.applyEffects(action.mEffects, action.mNegativeEffects),
+                    node.mWorldState.applyEffects(action.mEffects, action.mNegativeEffects, action.mActionType, randomValueBetween0100),
                     action.mActionType,
                     node.mWorldState.stamina,
                     node.mWorldState.playerHealth,

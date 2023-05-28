@@ -76,19 +76,16 @@ public class WorldState_Mine
         // If there is enough stamina
         // If there is enough health
         return (mWorldStateMask & worldStateDestination.mWorldStateMask) == worldStateDestination.mWorldStateMask &&
-               stamina >= worldStateDestination.stamina && playerHealth >= worldStateDestination.playerHealth
-               && monsterCurrentHealth <= worldStateDestination.monsterCurrentHealth;
+               stamina >= worldStateDestination.stamina && playerHealth >= worldStateDestination.playerHealth;
     }
     
     // WS & NP == 0
     private bool negativePreconditionsMet(WorldState_Mine worldStateDestination)
     {
-        // Check the masks
-        // If there is not enough stamina
-        // If there is not enough health
-        return (mWorldStateMask & worldStateDestination.mWorldStateMask) == 0 &&
-               stamina >= worldStateDestination.stamina && playerHealth >= worldStateDestination.playerHealth
-               && monsterCurrentHealth <= worldStateDestination.monsterCurrentHealth;
+        // Check the masks, worldStateDestination.mWorldStateMask should be 0 in mWorldStateMask
+        return (mWorldStateMask & worldStateDestination.mWorldStateMask) == 0
+               &&
+               stamina >= worldStateDestination.stamina && playerHealth >= worldStateDestination.playerHealth;
     }
     
     public bool checkPreconditions(WorldState_Mine worldStateDestination, WorldState_Mine worldStateNegativeDestination)
@@ -97,7 +94,7 @@ public class WorldState_Mine
     }
 
     // Apply the effects of an action to the current WorldState_Mine
-    public WorldState_Mine applyEffects(WorldState_Mine effects, WorldState_Mine negativeEffects)
+    public WorldState_Mine applyEffects(WorldState_Mine effects, WorldState_Mine negativeEffects, ActionPlanning_Mine.ActionType action, int random)
     {
         // Apply effects and negative effects
         // Mask effects
@@ -106,7 +103,7 @@ public class WorldState_Mine
         // Return the new WorldState_Mine
         WorldState_Mine newWorldState = new WorldState_Mine(mWorldStateMask);
         // If ACTION_TYPE_ATTACK (enum flagged) has been set
-        if ((mActionType & ActionPlanning_Mine.ActionType.ACTION_TYPE_ATTACK) == ActionPlanning_Mine.ActionType.ACTION_TYPE_ATTACK)
+        if ((action & ActionPlanning_Mine.ActionType.ACTION_TYPE_ATTACK) == ActionPlanning_Mine.ActionType.ACTION_TYPE_ATTACK)
         {
             int dmg = weapon.Attack(mActionType, mWorldStateMask);
             newWorldState.monsterHealth -= dmg;
@@ -123,11 +120,11 @@ public class WorldState_Mine
         newWorldState.stamina = stamina + effects.stamina + negativeEffects.stamina;
         newWorldState.playerHealth = playerHealth + effects.playerHealth + negativeEffects.playerHealth;
         
-        RandomThrows(newWorldState);
+        RandomThrows(newWorldState, random);
         return newWorldState;
     }
 
-    private void RandomThrows(WorldState_Mine newWorldState)
+    private void RandomThrows(WorldState_Mine newWorldState, int random)
     {
         #region Deactivations
 
@@ -265,9 +262,6 @@ public class WorldState_Mine
         if ((mWorldStateMask & WorldState_Mask.WS_MONSTER_STUNNED) != WorldState_Mask.WS_MONSTER_STUNNED &&
             (mWorldStateMask & WorldState_Mask.WS_MONSTER_FLEEING) != WorldState_Mask.WS_MONSTER_FLEEING) 
         {
-            // Throw a random number to see if we attack or charge or super
-            int random = Random.Range(0, 100);
-            
             // If the monster isnt Attacking, Charging, Super, Stunned or Fleeing
             if (((mWorldStateMask & WorldState_Mask.WS_MONSTER_ATTACK) != WorldState_Mask.WS_MONSTER_ATTACK) &&
                 ((mWorldStateMask & WorldState_Mask.WS_MONSTER_CHARGING) != WorldState_Mask.WS_MONSTER_CHARGING) &&
@@ -324,33 +318,34 @@ public class WorldState_Mine
 public enum WorldState_Mask
 {
     // Generic
-    WS_NONE = 0, // NADA
-    WS_MONSTER_IN_FOV = 1 << 6, // A VISTA
-    WS_MONSTER_IN_RANGE = 1 << 7, // A RANGO
-    WS_MONSTER_DEAD = 0b1, // MUERTO
+    WS_NONE = 0b_0, // NADA
+    WS_MONSTER_DEAD = 0b_1, // MUERTO
+    WS_MONSTER_IN_FOV = 0b_10, // A VISTA
+    WS_MONSTER_IN_RANGE = 0b_100, // A RANGO
     // Status
-    WS_MONSTER_INJURED = 0x8, // HERIDO
-    WS_MONSTER_PART_SEVERED = 0x10, // PARTE SECCIONADA
-    WS_MONSTER_PART_BROKEN = 1 << 5, // PARTE ROTA
+    WS_MONSTER_INJURED = 0b_1000, // HERIDO
+    WS_MONSTER_PART_SEVERED = 0b_10000, // PARTE SECCIONADA
+    WS_MONSTER_PART_BROKEN = 0b_100000, // PARTE ROTA
     // Managed
-    WS_MONSTER_FLEEING = 0b10, // Activation & Deactivation // HUYENDO
-    WS_MONSTER_ATTACK = 0x4, // Deactivation & Activation // ATACANDO
-    WS_MONSTER_FLYING = 1 << 8, // Deactivation & Activation // VOLANDO
-    WS_MONSTER_AGGRESSIVE = 1 << 9, // Activation & Deactivation // AGRESIVO
-    WS_MONSTER_SLEEPING = 1 << 10, // Activation & Deactivation // DURMIENDO
-    WS_MONSTER_STUNNED = 1 << 11, // Activation & Deactivation // ATURDIDO
-    WS_MONSTER_CHARGING = 1 << 12, // Deactivation & Activation // CARGANDO
-    WS_MONSTER_SUPER = 1 << 13, // Deactivation & Activation // SUPER
+    WS_MONSTER_FLEEING = 0b_1000000, // Activation & Deactivation // HUYENDO
+    WS_MONSTER_ATTACK = 0b_10000000, // Deactivation & Activation // ATACANDO
+    WS_MONSTER_FLYING = 0b_1_00000000, // Deactivation & Activation // VOLANDO
+    WS_MONSTER_AGGRESSIVE = 0b_10_00000000, // Activation & Deactivation // AGRESIVO
+    WS_MONSTER_SLEEPING = 0b_100_00000000, // Activation & Deactivation // DURMIENDO
+    WS_MONSTER_STUNNED = 0b_1000_00000000, // Activation & Deactivation // ATURDIDO
+    WS_MONSTER_CHARGING = 0b_10000_00000000, // Deactivation & Activation // CARGANDO
+    WS_MONSTER_SUPER = 0b_100000_00000000, // Deactivation & Activation // SUPER
     // Weapons
-    WS_WEAPON_EQUIPPED = 1 << 14, // EQUIPADO
-    // 00 -> Longsword (bit 15 and 16 are 0)
-    // 01 -> Hammer (bit 15 is 1 and bit 16 is 0)
-    // 10 -> Lance (bit 15 is 0 and bit 16 is 1)
+    WS_WEAPON_EQUIPPED = 0b_1000000_00000000, // EQUIPADO
+    WS_WEAPON_TYPE = 0b_1_10000000_00000000,
     // 11 -> Sword (bit 15 and 16 are 1)
-    WS_WEAPON_TYPE_LONGSWORD = ~(1 << 15 | 1 << 16), // EQUIPADA_LARGA_ESPADA
-    WS_WEAPON_TYPE_HAMMER = 1 << 15 & ~(1 << 16), // EQUIPADA_MARTILLO
-    WS_WEAPON_TYPE_LANCE = ~(1 << 15) & 1 << 16, // EQUIPADA_LANZA
-    WS_WEAPON_TYPE_SWORD = 1 << 15 & 1 << 16, // EQUIPADA_ESPADA
+    WS_WEAPON_TYPE_SWORD = 0b_1_10000000_00000000,
+    // 10 -> Lance (bit 15 is 0 and bit 16 is 1)
+    WS_WEAPON_TYPE_LANCE = 0b_1_00000000_00000000,
+    // 01 -> Hammer (bit 15 is 1 and bit 16 is 0)
+    WS_WEAPON_TYPE_HAMMER = 0b_10000000_00000000, 
+    // 00 -> Longsword (bit 15 is 0 and bit 16 is 0)
+    WS_WEAPON_TYPE_LONGSWORD = 0b_0,
 }
 
 // A struct called WeaponType that contains the different types of weapons

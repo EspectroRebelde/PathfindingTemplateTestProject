@@ -15,7 +15,7 @@ public class Planning_Mine : MonoBehaviour
     private void Start()
     {
         // Define a Random seed for the whole game
-        Random.InitState(0);
+        Random.InitState(42);
         
         mWorld = GetComponent<World_Mine>();
         UnityEngine.Debug.Log("Planning...");
@@ -58,7 +58,7 @@ public class Planning_Mine : MonoBehaviour
             mWorld.closedSet = closedSet;
 
             // Check destination
-            if (((node.mWorldState.mWorldStateMask & CurrentTargetNode.mWorldState.mWorldStateMask) != CurrentTargetNode.mWorldState.mWorldStateMask))
+            if (!WorldState_Mine.FinalStateCheck(node.mWorldState, CurrentTargetNode.mWorldState))
             {
                 // Open neighbours
                 foreach (NodePlanning_Mine neighbour in mWorld.GetNeighbours(node))
