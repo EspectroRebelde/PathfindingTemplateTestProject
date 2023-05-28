@@ -14,6 +14,9 @@ public class Planning_Mine : MonoBehaviour
 
     private void Start()
     {
+        // Define a Random seed for the whole game
+        Random.InitState(0);
+        
         mWorld = GetComponent<World_Mine>();
         UnityEngine.Debug.Log("Planning...");
         WorldState_Mine startWorldState = new WorldState_Mine(mWorld.mWorldStateMask, mWorld.mWorldStateHealth, mWorld.mWorldStateStamina);

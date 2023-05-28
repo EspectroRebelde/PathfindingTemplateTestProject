@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using Sirenix.OdinInspector;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Serialization;
+using Random = UnityEngine.Random;
 using Vector3 = System.Numerics.Vector3;
 
 [Serializable]
@@ -16,7 +18,19 @@ public class WorldState_Mine
     public int monsterCurrentHealth;
     public Weapon weapon;
     
-    public float stunCount = .25f;
+    public float2 stunCount = new (.25f, 2);
+    public float2 fleeCount = new (.75f, 2);
+    public float2 aggresiveCount = new (.5f, 1.5f);
+    
+    public int2 flyingCounter = new (0, 2);
+    public int2 chargingCounter = new (0, 2);
+    public int2 superAttackCounter = new (0, 2);
+    public int2 stunCounter = new (0, 2);
+    
+    public float attackPercentage = 20f;
+    public float flyPercentage = 15f;
+    public float chargePercentage = 10f;
+    public float superAttackPercentage = 5f;
 
     public WorldState_Mine(WorldState_Mask worldStateMask, 
         int stamina = 0, int playerHealth = 0, int monsterCurrentHealth = 0,
@@ -96,43 +110,236 @@ public class WorldState_Mine
         {
             int dmg = weapon.Attack(mActionType, mWorldStateMask);
             newWorldState.monsterHealth -= dmg;
+            
+            // If the dmg is > 0, the monster cannot be asleep
+            if (dmg > 0)
+            {
+                newWorldState.mWorldStateMask &= ~WorldState_Mask.WS_MONSTER_SLEEPING;
+            }
         }
-        
-        RandomThrows();
         
         newWorldState.mWorldStateMask |= effects.mWorldStateMask;
         newWorldState.mWorldStateMask &= ~negativeEffects.mWorldStateMask;
         newWorldState.stamina = stamina + effects.stamina + negativeEffects.stamina;
         newWorldState.playerHealth = playerHealth + effects.playerHealth + negativeEffects.playerHealth;
-        newWorldState.monsterHealth = monsterHealth + effects.monsterHealth + negativeEffects.monsterHealth;
+        
+        RandomThrows(newWorldState);
         return newWorldState;
     }
 
-    private void RandomThrows()
+    private void RandomThrows(WorldState_Mine newWorldState)
     {
-        // If the monster's health is lower than 
+        #region Deactivations
+
+        // Deactivate WS_MONSTER_FLEEING
+        if ((newWorldState.mWorldStateMask & WorldState_Mask.WS_MONSTER_IN_RANGE) == 0)
+        {
+            newWorldState.mWorldStateMask &= ~WorldState_Mask.WS_MONSTER_FLEEING;
+            newWorldState.mWorldStateMask &= ~WorldState_Mask.WS_MONSTER_FLYING;
+        }
+        
+        // WS_MONSTER_ATTACK
+        if ((mWorldStateMask & WorldState_Mask.WS_MONSTER_ATTACK) == WorldState_Mask.WS_MONSTER_ATTACK)
+        {
+            // Stop attacking
+            mWorldStateMask &= ~WorldState_Mask.WS_MONSTER_ATTACK;
+            // Inflict damage
+            newWorldState.playerHealth -= 10;
+        }
+        
+        // Charging WS_MONSTER_CHARGING, add the charge time
+        if ((mWorldStateMask & WorldState_Mask.WS_MONSTER_CHARGING) == WorldState_Mask.WS_MONSTER_CHARGING)
+        {
+            chargingCounter.x ++;
+            // If the charge time is over
+            if (chargingCounter.x >= chargingCounter.y)
+            {
+                // Stop charging
+                mWorldStateMask &= ~WorldState_Mask.WS_MONSTER_CHARGING;
+                // Reset the charge time
+                chargingCounter.x = 0;
+                // Inflict damage
+                newWorldState.playerHealth -= 20;
+            }
+        }
+        
+        // Super WS_MONSTER_SUPER, add the super time
+        if ((mWorldStateMask & WorldState_Mask.WS_MONSTER_SUPER) == WorldState_Mask.WS_MONSTER_SUPER)
+        {
+            superAttackCounter.x ++;
+            // If the super time is over
+            if (superAttackCounter.x >= superAttackCounter.y)
+            {
+                // Stop super
+                mWorldStateMask &= ~WorldState_Mask.WS_MONSTER_SUPER;
+                // Activate the Injured
+                mWorldStateMask |= WorldState_Mask.WS_MONSTER_INJURED;
+                // Reset the super time
+                superAttackCounter.x = 0;
+                // Inflict damage
+                newWorldState.playerHealth -= 40;
+            }
+        }
+        
+        // Flying WS_MONSTER_FLYING, add the fly time
+        if ((mWorldStateMask & WorldState_Mask.WS_MONSTER_FLYING) == WorldState_Mask.WS_MONSTER_FLYING)
+        {
+            flyingCounter.x ++;
+            // If the fly time is over
+            if (flyingCounter.x >= flyingCounter.y)
+            {
+                // Stop flying
+                mWorldStateMask &= ~WorldState_Mask.WS_MONSTER_FLYING;
+                // Reset the fly time
+                flyingCounter.x = 0;
+            }
+        }
+        
+        // Stunned WS_MONSTER_STUNNED, add the stun time
+        if ((mWorldStateMask & WorldState_Mask.WS_MONSTER_STUNNED) == WorldState_Mask.WS_MONSTER_STUNNED)
+        {
+            stunCounter.x ++;
+            // If the stun time is over
+            if (stunCounter.x >= stunCounter.y)
+            {
+                // Stop stunned
+                mWorldStateMask &= ~WorldState_Mask.WS_MONSTER_STUNNED;
+                // Reset the stun time
+                stunCounter.x = 0;
+            }
+        }
+
+        #endregion
+        
+        #region Activations
+
+        // If the monster's health is lower than monsterHealth * fleeCount
+        // WS_MONSTER_FLEEING
+        if (monsterCurrentHealth < monsterHealth * fleeCount.x)
+        {
+            // Activate the flee state on the wold mask
+            mWorldStateMask |= WorldState_Mask.WS_MONSTER_FLEEING;
+            // Deactivate aggressive
+            mWorldStateMask &= ~WorldState_Mask.WS_MONSTER_AGGRESSIVE;
+            // Activate the flying state on the wold mask
+            mWorldStateMask |= WorldState_Mask.WS_MONSTER_FLYING;
+            // Increase the flee count
+            fleeCount.x *= fleeCount.y;
+        }
+        
+        // If the monster's health is lower than monsterHealth * stunCount
+        // WS_MONSTER_STUNNED
+        if (monsterCurrentHealth < monsterHealth * stunCount.x)
+        {
+            // Activate the stun state on the wold mask
+            mWorldStateMask |= WorldState_Mask.WS_MONSTER_STUNNED;
+            // Deactivate flee and aggressive
+            mWorldStateMask &= ~WorldState_Mask.WS_MONSTER_FLEEING;
+            mWorldStateMask &= ~WorldState_Mask.WS_MONSTER_AGGRESSIVE;
+            // Increase the stun count
+            stunCount.x *= stunCount.y;
+        }
+        
+        // If the monster's health is lower than monsterHealth * aggresiveCount
+        // WS_MONSTER_AGGRESSIVE
+        if (monsterCurrentHealth < monsterHealth * aggresiveCount.x)
+        {
+            // Activate the aggressive state on the wold mask
+            mWorldStateMask |= WorldState_Mask.WS_MONSTER_AGGRESSIVE;
+            // Increase the aggressive count
+            aggresiveCount.x *= aggresiveCount.y;
+        }
+        
+        // If the monster isnt in FOV nor Range and is injured, activate the sleeping state
+        // WS_MONSTER_SLEEPING
+        if (((mWorldStateMask & WorldState_Mask.WS_MONSTER_IN_FOV) != WorldState_Mask.WS_MONSTER_IN_FOV) &&
+            ((mWorldStateMask & WorldState_Mask.WS_MONSTER_IN_RANGE) != WorldState_Mask.WS_MONSTER_IN_RANGE) &&
+            ((mWorldStateMask & WorldState_Mask.WS_MONSTER_INJURED) == WorldState_Mask.WS_MONSTER_INJURED))
+        {
+            // Activate the sleeping state on the wold mask
+            mWorldStateMask |= WorldState_Mask.WS_MONSTER_SLEEPING;
+        }
+
+        #region Attack Activations
+
+        // If the monster isnt Attacking, Charging, Super, Stunned or Fleeing
+        if (((mWorldStateMask & WorldState_Mask.WS_MONSTER_ATTACK) != WorldState_Mask.WS_MONSTER_ATTACK) &&
+            ((mWorldStateMask & WorldState_Mask.WS_MONSTER_CHARGING) != WorldState_Mask.WS_MONSTER_CHARGING) &&
+            ((mWorldStateMask & WorldState_Mask.WS_MONSTER_SUPER) != WorldState_Mask.WS_MONSTER_SUPER) &&
+            ((mWorldStateMask & WorldState_Mask.WS_MONSTER_STUNNED) != WorldState_Mask.WS_MONSTER_STUNNED) &&
+            ((mWorldStateMask & WorldState_Mask.WS_MONSTER_FLEEING) != WorldState_Mask.WS_MONSTER_FLEEING))
+        {
+            // Throw a random number to see if we attack or charge or super
+            int random = Random.Range(0, 100);
+            
+            // If the random number is lower than the super percentage
+            if (random < superAttackPercentage)
+            {
+                // Activate the super state on the wold mask
+                mWorldStateMask |= WorldState_Mask.WS_MONSTER_SUPER;
+                // Activate the aggressive state on the wold mask
+                mWorldStateMask |= WorldState_Mask.WS_MONSTER_AGGRESSIVE;
+            }
+            else if (random < chargePercentage + superAttackPercentage)
+            {
+                // Activate the charge state on the wold mask
+                mWorldStateMask |= WorldState_Mask.WS_MONSTER_CHARGING;
+            }
+            else if (random < attackPercentage + chargePercentage + superAttackPercentage)
+            {
+                // Activate the attack state on the wold mask
+                mWorldStateMask |= WorldState_Mask.WS_MONSTER_ATTACK;
+            }
+            
+            // If no counter is active, roll the fly counter
+            if (chargingCounter.x == 0 && stunCounter.x == 0 && superAttackCounter.x == 0)
+            {
+                if (random < flyPercentage)
+                {
+                    // Activate the flying state on the wold mask
+                    mWorldStateMask |= WorldState_Mask.WS_MONSTER_FLYING;
+                }
+            }
+
+        }
+
+        #endregion
+        
+        // If the monster's health is lower than 0 (dead)
+        // WS_MONSTER_DEAD
+        if (monsterCurrentHealth <= 0)
+        {
+            // Activate the dead state on the wold mask
+            mWorldStateMask |= WorldState_Mask.WS_MONSTER_DEAD;
+        }
+
+        #endregion
+
     }
 }
 
 [Flags]
 public enum WorldState_Mask
 {
+    // Generic
     WS_NONE = 0,
+    WS_MONSTER_IN_FOV = 1 << 6,
+    WS_MONSTER_IN_RANGE = 1 << 7,
     WS_MONSTER_DEAD = 0b1,
-    WS_MONSTER_FLEEING = 0b10,
-    WS_MONSTER_ATTACK = 0x4,
+    // Status
     WS_MONSTER_INJURED = 0x8,
     WS_MONSTER_PART_SEVERED = 0x10,
     WS_MONSTER_PART_BROKEN = 1 << 5,
-    WS_MONSTER_IN_FOV = 1 << 6,
-    WS_MONSTER_IN_RANGE = 1 << 7,
-    WS_MONSTER_FLYING = 1 << 8,
-    WS_MONSTER_AGGRESSIVE = 1 << 9,
-    WS_MONSTER_SLEEPING = 1 << 10,
-    WS_MONSTER_STUNNED = 1 << 11,
-    WS_MONSTER_CHARGING = 1 << 12,
-    WS_MONSTER_SUPER = 1 << 13,
-    
+    // Managed
+    WS_MONSTER_FLEEING = 0b10, // Activation & Deactivation
+    WS_MONSTER_ATTACK = 0x4, // Deactivation & Activation
+    WS_MONSTER_FLYING = 1 << 8, // Deactivation & Activation
+    WS_MONSTER_AGGRESSIVE = 1 << 9, // Activation & Deactivation
+    WS_MONSTER_SLEEPING = 1 << 10, // Activation & Deactivation
+    WS_MONSTER_STUNNED = 1 << 11, // Activation & Deactivation
+    WS_MONSTER_CHARGING = 1 << 12, // Deactivation & Activation
+    WS_MONSTER_SUPER = 1 << 13, // Deactivation & Activation
+    // Weapons
     WS_WEAPON_EQUIPPED = 1 << 14,
     // 00 -> Longsword (bit 15 and 16 are 0)
     // 01 -> Hammer (bit 15 is 1 and bit 16 is 0)
