@@ -987,7 +987,7 @@ MonoBehaviour:
   mWorldStateMask: 0
   mWorldStateHealth: 100
   mWorldStateStamina: 100
-  mWorldStateMonsterHealth: 400
+  mWorldStateMonsterHealth: 100
   mWorldStateMaskTarget: 1
   mWorldStateMinumumHealth: 0
   mWorldStateMinumumStamina: 0
@@ -1003,6 +1003,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1b4fd4e3139048f8864cdba027105f06, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  seed: 42
 --- !u!1 &1495132118
 GameObject:
   m_ObjectHideFlags: 0
