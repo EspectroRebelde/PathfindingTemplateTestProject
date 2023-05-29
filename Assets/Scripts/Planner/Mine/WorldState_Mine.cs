@@ -47,6 +47,7 @@ public class WorldState_Mine
         this.weapon = weaponRef;
     }
 
+    // ACTIVATE to handle similar states (stamina wise) [Idle, Move Slow, Move Fast] [Dodge, Block, Take Cover]
     public static bool operator ==(WorldState_Mine worldState1, WorldState_Mine worldState2)
     {
         // Check if the masks are the same
@@ -59,7 +60,8 @@ public class WorldState_Mine
 
     public static bool operator !=(WorldState_Mine worldState1, WorldState_Mine worldState2)
     {
-        return worldState1.mWorldStateMask != worldState2.mWorldStateMask || worldState1.monsterCurrentHealth != worldState2.monsterCurrentHealth;
+        return worldState1.mWorldStateMask != worldState2.mWorldStateMask || worldState1.monsterCurrentHealth != worldState2.monsterCurrentHealth ||
+               worldState1.weapon != worldState2.weapon;
     }
 
     public static bool FinalStateCheck(WorldState_Mine worldStateCurrent, WorldState_Mine worldStateDestination)
@@ -136,6 +138,11 @@ public class WorldState_Mine
             {
                 newWorldState.mWorldStateMask &= ~WorldState_Mask.WS_MONSTER_SLEEPING;
             }
+            // If the monsterCurrentHealth is <= 0, the monster is dead
+            if (newWorldState.monsterCurrentHealth <= 0)
+            {
+                newWorldState.mWorldStateMask |= WorldState_Mask.WS_MONSTER_DEAD;
+            }
         }
         
         newWorldState.mWorldStateMask |= effects.mWorldStateMask;
@@ -146,6 +153,7 @@ public class WorldState_Mine
         // If the action isnt attacking OR ACTION_TYPE_ATTACK_SET is active
         if ((action & ActionPlanning_Mine.ActionType.ACTION_TYPE_ATTACK) == 0 || (action & ActionPlanning_Mine.ActionType.ACTION_TYPE_ATTACK_SET) != 0)
         {
+            // ACTIVATE
             //RandomThrows(newWorldState, action, random);
         }
         return newWorldState;

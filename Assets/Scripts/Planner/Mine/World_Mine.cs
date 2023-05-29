@@ -61,6 +61,7 @@ public class World_Mine : MonoBehaviour
     {   
         mActionList = new List<ActionPlanning_Mine>();
 
+         // ACTIVATE
          mActionList.Add(
             new ActionPlanning_Mine(
                 ActionPlanning_Mine.ActionType.ACTION_TYPE_IDLE,
@@ -68,7 +69,7 @@ public class World_Mine : MonoBehaviour
                 new WorldState_Mine(WorldState_Mask.WS_NONE),
                 new WorldState_Mine(WorldState_Mask.WS_NONE, 10),
                 new WorldState_Mine(WorldState_Mask.WS_NONE),
-                5.0f, "None")
+                5.0f, "Idle")
          );
          
          #region ACTION_TYPE_MOVE
@@ -76,17 +77,18 @@ public class World_Mine : MonoBehaviour
              new ActionPlanning_Mine(
                  ActionPlanning_Mine.ActionType.ACTION_TYPE_MOVE_TO_TARGET_SLOW,
                     new WorldState_Mine(WorldState_Mask.WS_WEAPON_EQUIPPED, 3),
-                 new WorldState_Mine(WorldState_Mask.WS_MONSTER_FLYING | WorldState_Mask.WS_MONSTER_IN_RANGE | WorldState_Mask.WS_MONSTER_IN_FOV),
+                 new WorldState_Mine(WorldState_Mask.WS_MONSTER_FLYING | WorldState_Mask.WS_MONSTER_IN_RANGE),
                     new WorldState_Mine(WorldState_Mask.WS_MONSTER_IN_FOV | WorldState_Mask.WS_MONSTER_IN_RANGE, -3),
                  new WorldState_Mine(WorldState_Mask.WS_NONE),
                  7.5f, "Move Slow")
          );
 
+         // ACTIVATE
          mActionList.Add(
              new ActionPlanning_Mine(
                  ActionPlanning_Mine.ActionType.ACTION_TYPE_MOVE_TO_TARGET_FAST,
                  new WorldState_Mine(WorldState_Mask.WS_WEAPON_EQUIPPED, 10),
-                 new WorldState_Mine(WorldState_Mask.WS_MONSTER_FLYING | WorldState_Mask.WS_MONSTER_IN_RANGE | WorldState_Mask.WS_MONSTER_IN_FOV),
+                 new WorldState_Mine(WorldState_Mask.WS_MONSTER_FLYING | WorldState_Mask.WS_MONSTER_IN_RANGE),
                  new WorldState_Mine(WorldState_Mask.WS_MONSTER_IN_FOV | WorldState_Mask.WS_MONSTER_IN_RANGE),
                  new WorldState_Mine(WorldState_Mask.WS_NONE, -10),
                  10.0f, "Move Fast")
@@ -137,6 +139,7 @@ public class World_Mine : MonoBehaviour
         #endregion
         /*
         #region Attack Points
+        // ACTIVATE
         
         // The action should be ACTION_TYPE_ATTACK_NORMAL_POINT and whichever attack type is selected (normal, charging, super)
         mActionList.Add(
@@ -185,31 +188,34 @@ public class World_Mine : MonoBehaviour
         #endregion
         */
         
+        // ACTIVATE
         #region ACTION_TYPE_DEFEND
         mActionList.Add(
             new ActionPlanning_Mine(
                 ActionPlanning_Mine.ActionType.ACTION_TYPE_BLOCK,
-                new WorldState_Mine(WorldState_Mask.WS_MONSTER_IN_FOV | WorldState_Mask.WS_WEAPON_EQUIPPED | WorldState_Mask.WS_WEAPON_TYPE_LANCE, 0),
+                new WorldState_Mine(WorldState_Mask.WS_MONSTER_IN_RANGE | WorldState_Mask.WS_WEAPON_EQUIPPED | WorldState_Mask.WS_WEAPON_TYPE_LANCE, 0),
                 new WorldState_Mine(WorldState_Mask.WS_NONE),
                 new WorldState_Mine(WorldState_Mask.WS_NONE),
                 new WorldState_Mine(WorldState_Mask.WS_NONE, 0),
                 15.0f, "Block")
         );
         
+        // ACTIVATE
         mActionList.Add(
             new ActionPlanning_Mine(
                 ActionPlanning_Mine.ActionType.ACTION_TYPE_DODGE,
-                new WorldState_Mine(WorldState_Mask.WS_MONSTER_IN_FOV | WorldState_Mask.WS_WEAPON_EQUIPPED, 20),
+                new WorldState_Mine(WorldState_Mask.WS_MONSTER_IN_RANGE | WorldState_Mask.WS_WEAPON_EQUIPPED, 20),
                 new WorldState_Mine(WorldState_Mask.WS_NONE),
                 new WorldState_Mine(WorldState_Mask.WS_NONE),
                 new WorldState_Mine(WorldState_Mask.WS_NONE, -20),
                 20.0f, "Dodge")
         );
         
+        // ACTIVATE
         mActionList.Add(
             new ActionPlanning_Mine(
                 ActionPlanning_Mine.ActionType.ACTION_TYPE_TAKE_COVER,
-                new WorldState_Mine(WorldState_Mask.WS_MONSTER_IN_FOV | WorldState_Mask.WS_WEAPON_EQUIPPED, 10),
+                new WorldState_Mine(WorldState_Mask.WS_MONSTER_IN_RANGE | WorldState_Mask.WS_WEAPON_EQUIPPED, 10),
                 new WorldState_Mine(WorldState_Mask.WS_NONE),
                 new WorldState_Mine(WorldState_Mask.WS_NONE),
                 new WorldState_Mine(WorldState_Mask.WS_MONSTER_IN_RANGE, -10),
@@ -335,13 +341,6 @@ public class World_Mine : MonoBehaviour
         }
 
         return neighbours;
-    }
-
-    /***************************************************************************/
-
-    public static int PopulationCount(int n)
-    {
-        return System.Convert.ToString(n, 2).ToCharArray().Count(c => c == '1');
     }
 
     /***************************************************************************/

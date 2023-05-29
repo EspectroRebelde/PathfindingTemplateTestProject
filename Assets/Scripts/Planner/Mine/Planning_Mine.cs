@@ -21,7 +21,7 @@ public class Planning_Mine : MonoBehaviour
         mWorld = GetComponent<World_Mine>();
         UnityEngine.Debug.Log("Planning...");
         WorldState_Mine startWorldState = new WorldState_Mine(mWorld.mWorldStateMask, mWorld.mWorldStateHealth, mWorld.mWorldStateStamina, mWorld.mWorldStateMonsterHealth);
-        WorldState_Mine targetWorldState = new WorldState_Mine(mWorld.mWorldStateMaskTarget, mWorld.mWorldStateMinumumHealth, mWorld.mWorldStateMinumumStamina);
+        WorldState_Mine targetWorldState = new WorldState_Mine(mWorld.mWorldStateMaskTarget, mWorld.mWorldStateMinumumHealth, mWorld.mWorldStateMinumumStamina, 0, default, default, mWorld.mWorldStateMonsterHealth);
         FindPlan(startWorldState, targetWorldState);
     }
 
@@ -29,9 +29,9 @@ public class Planning_Mine : MonoBehaviour
 
     public List<NodePlanning_Mine> FindPlan(WorldState_Mine startWorldState, WorldState_Mine targetWorldState)
     {
-        CurrentStartNode = new NodePlanning_Mine(null, startWorldState, ActionPlanning_Mine.ActionType.ACTION_TYPE_NONE, startWorldState.stamina,
+        CurrentStartNode = new NodePlanning_Mine(new ActionPlanning_Mine(), startWorldState, ActionPlanning_Mine.ActionType.ACTION_TYPE_NONE, startWorldState.stamina,
             startWorldState.playerHealth, startWorldState.monsterHealth, default, startWorldState.monsterHealth);
-        CurrentTargetNode = new NodePlanning_Mine(null, targetWorldState, ActionPlanning_Mine.ActionType.ACTION_TYPE_NONE, targetWorldState.stamina,
+        CurrentTargetNode = new NodePlanning_Mine(new ActionPlanning_Mine(), targetWorldState, ActionPlanning_Mine.ActionType.ACTION_TYPE_NONE, targetWorldState.stamina,
             targetWorldState.playerHealth, 0, null, startWorldState.monsterHealth);
         
         List<NodePlanning_Mine> openSet = new List<NodePlanning_Mine>();
@@ -39,6 +39,8 @@ public class Planning_Mine : MonoBehaviour
         openSet.Add(CurrentStartNode);
         mWorld.openSet = openSet;
         NodePlanning_Mine node = CurrentStartNode;
+        
+        // While there are nodes to check and the target has not been reached
         while (openSet.Count > 0 && !WorldState_Mine.FinalStateCheck(node.mWorldState, CurrentTargetNode.mWorldState))
         {
             // Select best node from open list

@@ -69,5 +69,16 @@ public class ActionPlanning_Mine
         mName = name;
     }
 
+    public ActionPlanning_Mine()
+    {
+        mActionType = ActionType.ACTION_TYPE_NONE;
+        mPreconditions = new WorldState_Mine(WorldState_Mask.WS_NONE);
+        mNegativePreconditions = new WorldState_Mine(WorldState_Mask.WS_NONE);
+        mEffects = new WorldState_Mine(WorldState_Mask.WS_NONE);
+        mNegativeEffects = new WorldState_Mine(WorldState_Mask.WS_NONE);
+        mCost = 0.0f;
+        mName = "VOID";
+    }
+
     /***************************************************************************/
 }
