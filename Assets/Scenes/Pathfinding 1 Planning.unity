@@ -985,9 +985,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mWorldStateMask: 0
-  mWorldStateHealth: 0
-  mWorldStateStamina: 0
-  mWorldStateMaskTarget: 0
+  mWorldStateHealth: 100
+  mWorldStateStamina: 100
+  mWorldStateMonsterHealth: 400
+  mWorldStateMaskTarget: 1
   mWorldStateMinumumHealth: 0
   mWorldStateMinumumStamina: 0
 --- !u!114 &1441451180

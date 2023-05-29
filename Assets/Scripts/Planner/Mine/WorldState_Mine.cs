@@ -90,6 +90,16 @@ public class WorldState_Mine
     
     public bool checkPreconditions(WorldState_Mine worldStateDestination, WorldState_Mine worldStateNegativeDestination)
     {
+        // If the worldStateDestination has an action type
+        if (worldStateDestination.mActionType != ActionPlanning_Mine.ActionType.ACTION_TYPE_NONE)
+        {
+            // If the action type is not the same as the current action type
+            if (worldStateDestination.mActionType != mActionType)
+            {
+                return false;
+            }
+        }
+        
         return preconditionsMet(worldStateDestination) && negativePreconditionsMet(worldStateNegativeDestination);
     }
 
@@ -102,8 +112,8 @@ public class WorldState_Mine
         // Change health
         // Return the new WorldState_Mine
         WorldState_Mine newWorldState = new WorldState_Mine(mWorldStateMask);
-        // If ACTION_TYPE_ATTACK (enum flagged) has been set
-        if ((action & ActionPlanning_Mine.ActionType.ACTION_TYPE_ATTACK) == ActionPlanning_Mine.ActionType.ACTION_TYPE_ATTACK)
+        // If ACTION_TYPE_ATTACK (enum flagged) is been set
+        if ((action & ActionPlanning_Mine.ActionType.ACTION_TYPE_ATTACK_SET) != 0)
         {
             int dmg = weapon.Attack(mActionType, mWorldStateMask);
             newWorldState.monsterHealth -= dmg;
@@ -120,7 +130,11 @@ public class WorldState_Mine
         newWorldState.stamina = stamina + effects.stamina + negativeEffects.stamina;
         newWorldState.playerHealth = playerHealth + effects.playerHealth + negativeEffects.playerHealth;
         
-        RandomThrows(newWorldState, random);
+        // If the action isnt attacking OR ACTION_TYPE_ATTACK_SET is active
+        if ((action & ActionPlanning_Mine.ActionType.ACTION_TYPE_ATTACK) == 0 || (action & ActionPlanning_Mine.ActionType.ACTION_TYPE_ATTACK_SET) != 0)
+        {
+            RandomThrows(newWorldState, random);
+        }
         return newWorldState;
     }
 
