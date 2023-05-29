@@ -7,6 +7,8 @@ using Unity.Jobs;
 public class Planning_Mine : MonoBehaviour
 {
     public int seed = 42;
+    [Tooltip("20 is the base for 50/50, choose carefully")]
+    public int heuristicWeight = 200;
     private NodePlanning_Mine CurrentStartNode;
     private NodePlanning_Mine CurrentTargetNode;
 
@@ -148,7 +150,7 @@ public class Planning_Mine : MonoBehaviour
         // The closer the monster health is to goalNode.health the smaller the heuristic
         // The range is monsterHealth - goalNode.health
         // Needs to be scaled to 20 (maximum health) and 0 (minimum health)
-        return nodeA.mWorldState.monsterCurrentHealth * 20 / nodeA.mWorldState.monsterHealth;
+        return nodeA.mWorldState.monsterCurrentHealth * heuristicWeight / nodeA.mWorldState.monsterHealth;
         
         /*
          // The function weight should be determinated by:
