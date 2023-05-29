@@ -49,14 +49,17 @@ public class WorldState_Mine
 
     public static bool operator ==(WorldState_Mine worldState1, WorldState_Mine worldState2)
     {
-        return worldState1.mWorldStateMask == worldState2.mWorldStateMask && worldState1.stamina == worldState2.stamina &&
-               worldState1.playerHealth == worldState2.playerHealth && worldState1.monsterCurrentHealth == worldState2.monsterCurrentHealth;
+        // Check if the masks are the same
+        // Check if the monster health is the same
+        // Check if the weapon is the same
+        return worldState1.mWorldStateMask == worldState2.mWorldStateMask && 
+               worldState1.monsterCurrentHealth == worldState2.monsterCurrentHealth &&
+                worldState1.weapon == worldState2.weapon;
     }
 
     public static bool operator !=(WorldState_Mine worldState1, WorldState_Mine worldState2)
     {
-        return worldState1.mWorldStateMask != worldState2.mWorldStateMask || worldState1.stamina != worldState2.stamina ||
-               worldState1.playerHealth != worldState2.playerHealth || worldState1.monsterCurrentHealth != worldState2.monsterCurrentHealth;
+        return worldState1.mWorldStateMask != worldState2.mWorldStateMask || worldState1.monsterCurrentHealth != worldState2.monsterCurrentHealth;
     }
 
     public static bool FinalStateCheck(WorldState_Mine worldStateCurrent, WorldState_Mine worldStateDestination)
@@ -112,11 +115,21 @@ public class WorldState_Mine
         // Change health
         // Return the new WorldState_Mine
         WorldState_Mine newWorldState = new WorldState_Mine(mWorldStateMask);
-        // If ACTION_TYPE_ATTACK (enum flagged) is been set
-        if ((action & ActionPlanning_Mine.ActionType.ACTION_TYPE_ATTACK_SET) != 0)
+        newWorldState.monsterCurrentHealth = monsterCurrentHealth;
+        newWorldState.monsterHealth = monsterHealth;
+        
+        // If the action is an equip action
+        if ((action & ActionPlanning_Mine.ActionType.ACTION_TYPE_EQUIP_SET) != 0)
         {
-            int dmg = weapon.Attack(mActionType, mWorldStateMask);
-            newWorldState.monsterHealth -= dmg;
+            // Create a new weapon of the type of the action
+            weapon = new Weapon(Weapon.GetWeaponTypeFromAction(action));
+        }
+        
+        // If ACTION_TYPE_ATTACK (enum flagged) is been set
+        if ((action & ActionPlanning_Mine.ActionType.ACTION_TYPE_ATTACK) != 0)
+        {
+            int dmg = weapon.Attack(action, mWorldStateMask);
+            newWorldState.monsterCurrentHealth -= dmg;
             
             // If the dmg is > 0, the monster cannot be asleep
             if (dmg > 0)
@@ -133,12 +146,12 @@ public class WorldState_Mine
         // If the action isnt attacking OR ACTION_TYPE_ATTACK_SET is active
         if ((action & ActionPlanning_Mine.ActionType.ACTION_TYPE_ATTACK) == 0 || (action & ActionPlanning_Mine.ActionType.ACTION_TYPE_ATTACK_SET) != 0)
         {
-            RandomThrows(newWorldState, random);
+            //RandomThrows(newWorldState, action, random);
         }
         return newWorldState;
     }
 
-    private void RandomThrows(WorldState_Mine newWorldState, int random)
+    private void RandomThrows(WorldState_Mine newWorldState, ActionPlanning_Mine.ActionType action, int random)
     {
         #region Deactivations
 
@@ -154,8 +167,14 @@ public class WorldState_Mine
         {
             // Stop attacking
             mWorldStateMask &= ~WorldState_Mask.WS_MONSTER_ATTACK;
-            // Inflict damage
-            newWorldState.playerHealth -= 10;
+            // Inflict damage if the action isnt blocking, dodging or taking cover and the player is in range
+            if ((action & ActionPlanning_Mine.ActionType.ACTION_TYPE_BLOCK) == 0 && (action & ActionPlanning_Mine.ActionType.ACTION_TYPE_DODGE) == 0 &&
+                (action & ActionPlanning_Mine.ActionType.ACTION_TYPE_TAKE_COVER) == 0 && 
+                (mWorldStateMask & WorldState_Mask.WS_MONSTER_IN_RANGE) == WorldState_Mask.WS_MONSTER_IN_RANGE)
+            {
+                newWorldState.playerHealth -= 10;
+            }
+
         }
         
         // Charging WS_MONSTER_CHARGING, add the charge time
@@ -169,8 +188,13 @@ public class WorldState_Mine
                 mWorldStateMask &= ~WorldState_Mask.WS_MONSTER_CHARGING;
                 // Reset the charge time
                 chargingCounter.x = 0;
-                // Inflict damage
-                newWorldState.playerHealth -= 20;
+                // Inflict damage if the action isnt blocking, dodging or taking cover and the player is in range
+                if ((action & ActionPlanning_Mine.ActionType.ACTION_TYPE_BLOCK) == 0 && (action & ActionPlanning_Mine.ActionType.ACTION_TYPE_DODGE) == 0 &&
+                    (action & ActionPlanning_Mine.ActionType.ACTION_TYPE_TAKE_COVER) == 0 && 
+                    (mWorldStateMask & WorldState_Mask.WS_MONSTER_IN_RANGE) == WorldState_Mask.WS_MONSTER_IN_RANGE)
+                {
+                    newWorldState.playerHealth -= 20;
+                }
             }
         }
         
@@ -187,8 +211,12 @@ public class WorldState_Mine
                 mWorldStateMask |= WorldState_Mask.WS_MONSTER_INJURED;
                 // Reset the super time
                 superAttackCounter.x = 0;
-                // Inflict damage
-                newWorldState.playerHealth -= 40;
+                // Inflict damage if the action isnt taking cover and the player is in range
+                if ((action & ActionPlanning_Mine.ActionType.ACTION_TYPE_TAKE_COVER) == 0 && 
+                    (mWorldStateMask & WorldState_Mask.WS_MONSTER_IN_RANGE) == WorldState_Mask.WS_MONSTER_IN_RANGE)
+                {
+                    newWorldState.playerHealth -= 30;
+                }
             }
         }
         
@@ -274,7 +302,9 @@ public class WorldState_Mine
         #region Attack Activations
 
         if ((mWorldStateMask & WorldState_Mask.WS_MONSTER_STUNNED) != WorldState_Mask.WS_MONSTER_STUNNED &&
-            (mWorldStateMask & WorldState_Mask.WS_MONSTER_FLEEING) != WorldState_Mask.WS_MONSTER_FLEEING) 
+            (mWorldStateMask & WorldState_Mask.WS_MONSTER_FLEEING) != WorldState_Mask.WS_MONSTER_FLEEING &&
+            (mWorldStateMask & WorldState_Mask.WS_MONSTER_SLEEPING) != WorldState_Mask.WS_MONSTER_SLEEPING &&
+            (mWorldStateMask & WorldState_Mask.WS_MONSTER_IN_FOV) == WorldState_Mask.WS_MONSTER_IN_FOV)
         {
             // If the monster isnt Attacking, Charging, Super, Stunned or Fleeing
             if (((mWorldStateMask & WorldState_Mask.WS_MONSTER_ATTACK) != WorldState_Mask.WS_MONSTER_ATTACK) &&
@@ -309,6 +339,8 @@ public class WorldState_Mine
                 {
                     // Activate the flying state on the wold mask
                     mWorldStateMask |= WorldState_Mask.WS_MONSTER_FLYING;
+                    // Deactivate InRange
+                    mWorldStateMask &= ~WorldState_Mask.WS_MONSTER_IN_RANGE;
                 }
             }
         }
@@ -486,30 +518,29 @@ public class Weapon
 
     public int Attack(ActionPlanning_Mine.ActionType attackMask, WorldState_Mask worldStateMask)
     {
-        // attackMask is the attack type
-        // NORMAL
-        // CHARGING
-        // SUPER
+        // Set Normal_Point as default
+        attackMask |= ActionPlanning_Mine.ActionType.ACTION_TYPE_ATTACK_NORMAL_POINT;
+        
         // Check the flag to see which
         if ((attackMask & ActionPlanning_Mine.ActionType.ACTION_TYPE_ATTACK_NORMAL) == ActionPlanning_Mine.ActionType.ACTION_TYPE_ATTACK_NORMAL)
         {
             // Normal attack
-            return AttackType(ActionPlanning_Mine.ActionType.ACTION_TYPE_ATTACK_NORMAL, worldStateMask) * 
+            return AttackType(ActionPlanning_Mine.ActionType.ACTION_TYPE_ATTACK_NORMAL, worldStateMask) + 
                    AttackPlace(ActionPlanning_Mine.ActionType.ACTION_TYPE_ATTACK_NORMAL_POINT, worldStateMask);
         }
 
         if ((attackMask & ActionPlanning_Mine.ActionType.ACTION_TYPE_ATTACK_CHARGING) == ActionPlanning_Mine.ActionType.ACTION_TYPE_ATTACK_CHARGING)
         {
             // Charging attack
-            return AttackType(ActionPlanning_Mine.ActionType.ACTION_TYPE_ATTACK_CHARGING, worldStateMask) * 
+            return AttackType(ActionPlanning_Mine.ActionType.ACTION_TYPE_ATTACK_CHARGING, worldStateMask) + 
                    AttackPlace(ActionPlanning_Mine.ActionType.ACTION_TYPE_ATTACK_WEAK_POINT, worldStateMask);
         }
 
         if ((attackMask & ActionPlanning_Mine.ActionType.ACTION_TYPE_ATTACK_SUPER) == ActionPlanning_Mine.ActionType.ACTION_TYPE_ATTACK_SUPER)
         {
             // Super attack
-            return AttackType(ActionPlanning_Mine.ActionType.ACTION_TYPE_ATTACK_SUPER, worldStateMask) * 
-                   AttackPlace(ActionPlanning_Mine.ActionType.ACTION_TYPE_ATTACK_BREAKABLE_PART, worldStateMask);
+            return (AttackType(ActionPlanning_Mine.ActionType.ACTION_TYPE_ATTACK_SUPER, worldStateMask) +
+                    AttackPlace(ActionPlanning_Mine.ActionType.ACTION_TYPE_ATTACK_BREAKABLE_PART, worldStateMask));
         }
 
         return 0;
@@ -528,5 +559,28 @@ public class Weapon
     public bool CanSever()
     {
         return canSever;
+    }
+    
+    public static WeaponType GetWeaponTypeFromAction(ActionPlanning_Mine.ActionType actionType)
+    {
+        // Check the weapon type (sword, hammer, lance and longsword)
+        if ((actionType & ActionPlanning_Mine.ActionType.ACTION_TYPE_EQUIP_WEAPON_SWORD) == ActionPlanning_Mine.ActionType.ACTION_TYPE_EQUIP_WEAPON_SWORD)
+        {
+            return WeaponType.SWORD;
+        }
+
+        if ((actionType & ActionPlanning_Mine.ActionType.ACTION_TYPE_EQUIP_WEAPON_HAMMER) == ActionPlanning_Mine.ActionType.ACTION_TYPE_EQUIP_WEAPON_HAMMER)
+        {
+            return WeaponType.HAMMER;
+        }
+        if ((actionType & ActionPlanning_Mine.ActionType.ACTION_TYPE_EQUIP_WEAPON_LANCE) == ActionPlanning_Mine.ActionType.ACTION_TYPE_EQUIP_WEAPON_LANCE)
+        {
+            return WeaponType.LANCE;
+        }
+        if ((actionType & ActionPlanning_Mine.ActionType.ACTION_TYPE_EQUIP_WEAPON_LONSWORD) == ActionPlanning_Mine.ActionType.ACTION_TYPE_EQUIP_WEAPON_LONSWORD)
+        {
+            return WeaponType.LONGSWORD;
+        }
+        return WeaponType.NONE;
     }
 }

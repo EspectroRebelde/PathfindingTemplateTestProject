@@ -24,12 +24,8 @@ public class NodePlanning_Mine
         mParent = null;
         
         worldState.mActionType = actionType;
-        worldState.stamina = stamina;
-        worldState.playerHealth = playerHealth;
         worldState.weapon = weapon;
-
-        worldState.monsterCurrentHealth = monsterCurrentHealth;
-        worldState.monsterHealth = monsterHealth;
+        
     }
 
     /***************************************************************************/

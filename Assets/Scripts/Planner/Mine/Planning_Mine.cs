@@ -6,6 +6,7 @@ using Unity.Jobs;
 
 public class Planning_Mine : MonoBehaviour
 {
+    public int seed = 42;
     private NodePlanning_Mine CurrentStartNode;
     private NodePlanning_Mine CurrentTargetNode;
 
@@ -15,7 +16,7 @@ public class Planning_Mine : MonoBehaviour
     private void Start()
     {
         // Define a Random seed for the whole game
-        Random.InitState(42);
+        Random.InitState(seed);
         
         mWorld = GetComponent<World_Mine>();
         UnityEngine.Debug.Log("Planning...");
@@ -38,8 +39,7 @@ public class Planning_Mine : MonoBehaviour
         openSet.Add(CurrentStartNode);
         mWorld.openSet = openSet;
         NodePlanning_Mine node = CurrentStartNode;
-        while (openSet.Count > 0 && ((node.mWorldState.mWorldStateMask & CurrentTargetNode.mWorldState.mWorldStateMask) !=
-                                     CurrentTargetNode.mWorldState.mWorldStateMask))
+        while (openSet.Count > 0 && !WorldState_Mine.FinalStateCheck(node.mWorldState, CurrentTargetNode.mWorldState))
         {
             // Select best node from open list
             node = openSet[0];
@@ -74,7 +74,7 @@ public class Planning_Mine : MonoBehaviour
                         neighbour.gCost = newCostToNeighbour;
                         neighbour.hCost = Heuristic(neighbour, CurrentTargetNode);
                         neighbour.mParent = node;
-                        if (openSet.All(n => n.mWorldState != neighbour.mWorldState))
+                        if (!openSet.Any(n => n.mWorldState == neighbour.mWorldState))
                         {
                             openSet.Add(neighbour);
                             mWorld.openSet = openSet;
@@ -143,16 +143,20 @@ public class Planning_Mine : MonoBehaviour
     private int Heuristic(NodePlanning_Mine nodeA, NodePlanning_Mine goalNode)
     {
         // Heuristic function
-        // The function weight should be determinated by:
+        // The closer the monster health is to goalNode.health the smaller the heuristic
+        // The range is monsterHealth - goalNode.health
+        // Needs to be scaled to 20 (maximum health) and 0 (minimum health)
+        return nodeA.mWorldState.monsterCurrentHealth * 20 / nodeA.mWorldState.monsterHealth;
+        
+        /*
+         // The function weight should be determinated by:
         // 70% - Monster health (the less health the closer to destination)
         // 15% - Player health (the more health the better)
         // 15% - Stamina (the more stamina the better)
         // NodeB is the target node (the monster health we want to reach, the player health we want to have and the stamina we want to have)
         // NodeA is the current node (the monster health we have, the player health we have and the stamina we have)
         // The function should return a value between 0 and 100
-        // 0 means that the node is exactly the same as the target node
-        // 100 means that the node is the opposite of the target node
-        
+
         // Monster health
         int monsterHealthHeuristic = (goalNode.mWorldState.monsterHealth - nodeA.mWorldState.monsterHealth) * 100 / goalNode.mWorldState.monsterHealth;
         // Player health
@@ -160,7 +164,11 @@ public class Planning_Mine : MonoBehaviour
         // Stamina
         int staminaHeuristic = (nodeA.mWorldState.stamina - goalNode.mWorldState.stamina) * 100 / nodeA.mWorldState.stamina;
         // Weighted average
-        return (monsterHealthHeuristic * 70 + playerHealthHeuristic * 15 + staminaHeuristic * 15) / 100;
+        // 0 means that the node is exactly the same as the target node
+        // 100 means that the node is the opposite of the target node
+        return (int)(monsterHealthHeuristic * 0.7f + playerHealthHeuristic * 0.15f + staminaHeuristic * 0.15f);
+         */
+        
     }
 
     /***************************************************************************/
