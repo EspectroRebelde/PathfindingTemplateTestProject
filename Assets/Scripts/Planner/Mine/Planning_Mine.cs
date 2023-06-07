@@ -108,6 +108,8 @@ public class Planning_Mine : MonoBehaviour
 
         // Log plan
         UnityEngine.Debug.Log("PLAN FOUND!");
+        // Log the chosen weapon
+        UnityEngine.Debug.LogFormat("Weapon: {0}", mWorld.mWorldStateMask.HasFlag(WorldState_Mask.WS_WEAPON_TYPE_SWORD) ? "Sword" : mWorld.mWorldStateMask.HasFlag(WorldState_Mask.WS_WEAPON_TYPE_LANCE) ? "Lance" : mWorld.mWorldStateMask.HasFlag(WorldState_Mask.WS_WEAPON_TYPE_HAMMER) ? "Hammer" : "Longsword");
         foreach (var t in mWorld.plan)
         {
             UnityEngine.Debug.LogFormat("{0} Accumulated cost: {1}", t.MActionPlanning.mName, t.gCost);
