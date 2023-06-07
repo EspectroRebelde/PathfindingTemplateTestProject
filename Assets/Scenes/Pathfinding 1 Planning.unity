@@ -948,8 +948,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1441451178}
-  - component: {fileID: 1441451180}
   - component: {fileID: 1441451179}
+  - component: {fileID: 1441451180}
   m_Layer: 0
   m_Name: Planning
   m_TagString: Untagged
@@ -987,7 +987,7 @@ MonoBehaviour:
   mWorldStateMask: 0
   mWorldStateHealth: 100
   mWorldStateStamina: 100
-  mWorldStateMonsterHealth: 100
+  mWorldStateMonsterHealth: 200
   mWorldStateMaskTarget: 1
   mWorldStateMinumumHealth: 0
   mWorldStateMinumumStamina: 0
@@ -1004,6 +1004,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   seed: 42
+  heuristicWeight: 200
 --- !u!1 &1495132118
 GameObject:
   m_ObjectHideFlags: 0

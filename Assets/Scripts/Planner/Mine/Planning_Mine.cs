@@ -24,17 +24,15 @@ public class Planning_Mine : MonoBehaviour
         UnityEngine.Debug.Log("Planning...");
         WorldState_Mine startWorldState = new WorldState_Mine(mWorld.mWorldStateMask, mWorld.mWorldStateHealth, mWorld.mWorldStateStamina, mWorld.mWorldStateMonsterHealth);
         WorldState_Mine targetWorldState = new WorldState_Mine(mWorld.mWorldStateMaskTarget, mWorld.mWorldStateMinumumHealth, mWorld.mWorldStateMinumumStamina, 0, default, default, mWorld.mWorldStateMonsterHealth);
-        FindPlan(startWorldState, targetWorldState);
+        FindInitialPlan(startWorldState, targetWorldState);
     }
 
     /***************************************************************************/
 
-    public List<NodePlanning_Mine> FindPlan(WorldState_Mine startWorldState, WorldState_Mine targetWorldState)
+    public List<NodePlanning_Mine> FindPlan(NodePlanning_Mine startNode, NodePlanning_Mine targetNode)
     {
-        CurrentStartNode = new NodePlanning_Mine(new ActionPlanning_Mine(), startWorldState, ActionPlanning_Mine.ActionType.ACTION_TYPE_NONE, startWorldState.stamina,
-            startWorldState.playerHealth, startWorldState.monsterHealth, default, startWorldState.monsterHealth);
-        CurrentTargetNode = new NodePlanning_Mine(new ActionPlanning_Mine(), targetWorldState, ActionPlanning_Mine.ActionType.ACTION_TYPE_NONE, targetWorldState.stamina,
-            targetWorldState.playerHealth, 0, null, startWorldState.monsterHealth);
+        CurrentStartNode = startNode;
+        CurrentTargetNode = targetNode;
         
         List<NodePlanning_Mine> openSet = new List<NodePlanning_Mine>();
         HashSet<NodePlanning_Mine> closedSet = new HashSet<NodePlanning_Mine>();
@@ -116,6 +114,158 @@ public class Planning_Mine : MonoBehaviour
         }
 
         return mWorld.plan;
+    }
+
+    /// <summary>
+    /// This will set 4 initial plans, one for each possible initial state depending on weapons
+    /// Then, the best plan will be selected
+    /// </summary>
+    /// <returns></returns>
+    public List<NodePlanning_Mine> FindInitialPlan(WorldState_Mine initial, WorldState_Mine final)
+    {
+        Weapon weapon = null;
+        
+        // Check if the current initial state defines a weapon
+        if ((initial.mWorldStateMask & WorldState_Mask.WS_WEAPON_EQUIPPED) != 0)
+        {
+            // Set the weapon on the final state as the same as the initial state
+            if ((initial.mWorldStateMask & WorldState_Mask.WS_WEAPON_TYPE_SWORD) != 0)
+            {
+                final.mWorldStateMask |= WorldState_Mask.WS_WEAPON_TYPE_SWORD;
+                weapon = new Weapon(WeaponType.SWORD);
+            }
+            else if ((initial.mWorldStateMask & WorldState_Mask.WS_WEAPON_TYPE_LANCE) != 0)
+            {
+                final.mWorldStateMask |= WorldState_Mask.WS_WEAPON_TYPE_LANCE;
+                weapon = new Weapon(WeaponType.LANCE);
+            }
+            else if ((initial.mWorldStateMask & WorldState_Mask.WS_WEAPON_TYPE_HAMMER) != 0)
+            {
+                final.mWorldStateMask |= WorldState_Mask.WS_WEAPON_TYPE_HAMMER;
+                weapon = new Weapon(WeaponType.HAMMER);
+            }
+            else
+            {
+                final.mWorldStateMask |= WorldState_Mask.WS_WEAPON_TYPE_LONGSWORD;
+                weapon = new Weapon(WeaponType.LONGSWORD);
+            }
+            
+            // Action to equip the weapon
+            final.mWorldStateMask |= WorldState_Mask.WS_WEAPON_EQUIPPED;
+        }
+        // If the final state defines one, set it on the initial state
+        else if ((final.mWorldStateMask & WorldState_Mask.WS_WEAPON_EQUIPPED) != 0)
+        {
+            if ((final.mWorldStateMask & WorldState_Mask.WS_WEAPON_TYPE_SWORD) != 0)
+            {
+                initial.mWorldStateMask |= WorldState_Mask.WS_WEAPON_TYPE_SWORD;
+                weapon = new Weapon(WeaponType.SWORD);
+            }
+            else if ((final.mWorldStateMask & WorldState_Mask.WS_WEAPON_TYPE_LANCE) != 0)
+            {
+                initial.mWorldStateMask |= WorldState_Mask.WS_WEAPON_TYPE_LANCE;
+                weapon = new Weapon(WeaponType.LANCE);
+            }
+            else if ((final.mWorldStateMask & WorldState_Mask.WS_WEAPON_TYPE_HAMMER) != 0)
+            {
+                initial.mWorldStateMask |= WorldState_Mask.WS_WEAPON_TYPE_HAMMER;
+                weapon = new Weapon(WeaponType.HAMMER);
+            }
+            else
+            {
+                initial.mWorldStateMask |= WorldState_Mask.WS_WEAPON_TYPE_LONGSWORD;
+                weapon = new Weapon(WeaponType.LONGSWORD);
+            }
+            
+            // Activate the initial weapon equpped
+            initial.mWorldStateMask |= WorldState_Mask.WS_WEAPON_EQUIPPED;
+        }
+        
+        // Create the nodeplannings for initial and final states
+        // CurrentStartNode = new NodePlanning_Mine(new ActionPlanning_Mine(), startWorldState, ActionPlanning_Mine.ActionType.ACTION_TYPE_NONE, startWorldState.stamina,
+        // startWorldState.playerHealth, startWorldState.monsterHealth, default, startWorldState.monsterHealth);
+        // CurrentTargetNode = new NodePlanning_Mine(new ActionPlanning_Mine(), targetWorldState, ActionPlanning_Mine.ActionType.ACTION_TYPE_NONE, targetWorldState.stamina,
+        //     targetWorldState.playerHealth, 0, null, startWorldState.monsterHealth);
+
+        NodePlanning_Mine initialNode = new NodePlanning_Mine(new ActionPlanning_Mine(), initial, ActionPlanning_Mine.ActionType.ACTION_TYPE_NONE, initial.stamina,
+            initial.playerHealth, initial.monsterHealth, weapon, initial.monsterHealth);
+        
+        NodePlanning_Mine finalNode = new NodePlanning_Mine(new ActionPlanning_Mine(), final, ActionPlanning_Mine.ActionType.ACTION_TYPE_NONE, final.stamina,
+            final.playerHealth, 0, weapon, initial.monsterHealth);
+        
+        // If we have a weapon, we Find plan with both nodeplanings
+        List<NodePlanning_Mine> plan = null;
+        if (weapon != null)
+        {
+            // Find plan with both nodeplanings
+            plan =
+            FindPlan(initialNode, finalNode);
+        }
+        else
+        {
+            plan =
+            FindFullPlan(initialNode, finalNode);
+        }
+
+        //Log the plan then return it
+        UnityEngine.Debug.Log("--------------------");
+        UnityEngine.Debug.Log("PLAN FOUND!");
+        foreach (var t in plan)
+        {
+            UnityEngine.Debug.LogFormat("{0} Accumulated cost: {1}", t.MActionPlanning.mName, t.gCost);
+        }
+        
+        return plan;
+        
+    }
+
+    private List<NodePlanning_Mine> FindFullPlan(NodePlanning_Mine startNode, NodePlanning_Mine targetNode)
+    {
+        // Generates 4 FindPlans, one for each weapon
+        // Then, selects the best one
+        
+        // Set the weapon and set the equipped and weapon flag on the initial state
+        startNode.mWorldState.mWorldStateMask |= WorldState_Mask.WS_WEAPON_EQUIPPED;
+        
+        // Create the 4 initial nodes
+        NodePlanning_Mine longswordNode = new NodePlanning_Mine(new ActionPlanning_Mine(), startNode.mWorldState, ActionPlanning_Mine.ActionType.ACTION_TYPE_NONE, startNode.mWorldState.stamina,
+            startNode.mWorldState.playerHealth, startNode.mWorldState.monsterHealth, new Weapon(WeaponType.LONGSWORD), startNode.mWorldState.monsterHealth);
+        
+        startNode.mWorldState.mWorldStateMask |= WorldState_Mask.WS_WEAPON_TYPE_SWORD;
+        NodePlanning_Mine swordNode = new NodePlanning_Mine(new ActionPlanning_Mine(), startNode.mWorldState, ActionPlanning_Mine.ActionType.ACTION_TYPE_NONE, startNode.mWorldState.stamina,
+            startNode.mWorldState.playerHealth, startNode.mWorldState.monsterHealth, new Weapon(WeaponType.SWORD), startNode.mWorldState.monsterHealth);
+        
+        startNode.mWorldState.mWorldStateMask |= WorldState_Mask.WS_WEAPON_TYPE_LANCE;
+        NodePlanning_Mine lanceNode = new NodePlanning_Mine(new ActionPlanning_Mine(), startNode.mWorldState, ActionPlanning_Mine.ActionType.ACTION_TYPE_NONE, startNode.mWorldState.stamina,
+            startNode.mWorldState.playerHealth, startNode.mWorldState.monsterHealth, new Weapon(WeaponType.LANCE), startNode.mWorldState.monsterHealth);
+        
+        startNode.mWorldState.mWorldStateMask |= WorldState_Mask.WS_WEAPON_TYPE_HAMMER;
+        NodePlanning_Mine hammerNode = new NodePlanning_Mine(new ActionPlanning_Mine(), startNode.mWorldState, ActionPlanning_Mine.ActionType.ACTION_TYPE_NONE, startNode.mWorldState.stamina,
+            startNode.mWorldState.playerHealth, startNode.mWorldState.monsterHealth, new Weapon(WeaponType.HAMMER), startNode.mWorldState.monsterHealth);
+        
+        // Find plan for each weapon
+        List<NodePlanning_Mine> longswordPlan = FindPlan(longswordNode, targetNode);
+        List<NodePlanning_Mine> swordPlan = FindPlan(swordNode, targetNode);
+        List<NodePlanning_Mine> lancePlan = FindPlan(lanceNode, targetNode);
+        List<NodePlanning_Mine> hammerPlan = FindPlan(hammerNode, targetNode);
+        
+        // Select the best plan
+        List<NodePlanning_Mine> bestPlan = longswordPlan;
+        if (swordPlan.Count < bestPlan.Count)
+        {
+            bestPlan = swordPlan;
+        }
+        if (lancePlan.Count < bestPlan.Count)
+        {
+            bestPlan = lancePlan;
+        }
+        if (hammerPlan.Count < bestPlan.Count)
+        {
+            bestPlan = hammerPlan;
+        }
+        
+        return bestPlan;
+        
     }
 
     /***************************************************************************/

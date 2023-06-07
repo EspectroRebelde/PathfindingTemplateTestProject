@@ -392,14 +392,14 @@ public enum WorldState_Mask
     // Weapons
     WS_WEAPON_EQUIPPED = 0b_1000000_00000000, // EQUIPADO
     WS_WEAPON_TYPE = 0b_1_10000000_00000000,
-    // 11 -> Sword (bit 15 and 16 are 1)
+    // 11 -> Sword (bit 15 and 16 are 1) and WS_WEAPON_EQUIPPED
     WS_WEAPON_TYPE_SWORD = 0b_1_10000000_00000000,
-    // 10 -> Lance (bit 15 is 0 and bit 16 is 1)
+    // 10 -> Lance (bit 15 is 0 and bit 16 is 1) and WS_WEAPON_EQUIPPED
     WS_WEAPON_TYPE_LANCE = 0b_1_00000000_00000000,
-    // 01 -> Hammer (bit 15 is 1 and bit 16 is 0)
-    WS_WEAPON_TYPE_HAMMER = 0b_10000000_00000000, 
-    // 00 -> Longsword (bit 15 is 0 and bit 16 is 0)
-    WS_WEAPON_TYPE_LONGSWORD = 0b_0,
+    // 01 -> Hammer (bit 15 is 1 and bit 16 is 0) and WS_WEAPON_EQUIPPED
+    WS_WEAPON_TYPE_HAMMER = 0b_10000000_00000000,
+    // 00 -> Longsword (bit 15 is 0 and bit 16 is 0) and WS_WEAPON_EQUIPPED and BOTH bits 15 and 16 are 0
+    WS_WEAPON_TYPE_LONGSWORD = 0b_0_00000000_00000000 | WS_WEAPON_EQUIPPED,
 }
 
 // A struct called WeaponType that contains the different types of weapons
