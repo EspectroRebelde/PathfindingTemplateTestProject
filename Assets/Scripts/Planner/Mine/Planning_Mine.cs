@@ -21,10 +21,24 @@ public class Planning_Mine : MonoBehaviour
         Random.InitState(seed);
         
         mWorld = GetComponent<World_Mine>();
+
+        PlanningSetUp(mWorld.mWorldStateMask, mWorld.mWorldStateHealth, mWorld.mWorldStateStamina, mWorld.mWorldStateMonsterHealth,
+            mWorld.mWorldStateMaskTarget, mWorld.mWorldStateMinumumHealth, mWorld.mWorldStateMinumumStamina, 0, mWorld.mWorldStateMonsterHealth);
+    }
+
+    public List<NodePlanning_Mine> PlanningSetUp(WorldState_Mask initialMask, int initialHealth, int initialStamina, int initialMonsterHealth, WorldState_Mask targetMask, int targetHealth, int targetStamina, int targetMonsterHealth, int targetMH)
+    {
         UnityEngine.Debug.Log("Planning...");
-        WorldState_Mine startWorldState = new WorldState_Mine(mWorld.mWorldStateMask, mWorld.mWorldStateHealth, mWorld.mWorldStateStamina, mWorld.mWorldStateMonsterHealth);
-        WorldState_Mine targetWorldState = new WorldState_Mine(mWorld.mWorldStateMaskTarget, mWorld.mWorldStateMinumumHealth, mWorld.mWorldStateMinumumStamina, 0, default, default, mWorld.mWorldStateMonsterHealth);
-        FindInitialPlan(startWorldState, targetWorldState);
+        WorldState_Mine startWorldState = new WorldState_Mine(initialMask, initialHealth, initialStamina, initialMonsterHealth);
+        WorldState_Mine targetWorldState = new WorldState_Mine(targetMask, targetHealth, targetStamina, targetMonsterHealth, default, default, targetMH);
+        return FindInitialPlan(startWorldState, targetWorldState);
+    }
+
+    public List<NodePlanning_Mine> PlanningSetUp(WorldState_Mask initialMask, int initialHealth, int initialStamina, int initialMonsterHealth,
+        WorldState_Mine targetNode)
+    {
+        return PlanningSetUp(initialMask, initialHealth, initialStamina, initialMonsterHealth, 
+            targetNode.mWorldStateMask, targetNode.playerHealth, targetNode.stamina, targetNode.monsterCurrentHealth, targetNode.monsterHealth);
     }
 
     /***************************************************************************/
@@ -110,9 +124,17 @@ public class Planning_Mine : MonoBehaviour
         UnityEngine.Debug.Log("PLAN FOUND!");
         // Log the chosen weapon
         UnityEngine.Debug.LogFormat("Weapon: {0}", mWorld.mWorldStateMask.HasFlag(WorldState_Mask.WS_WEAPON_TYPE_SWORD) ? "Sword" : mWorld.mWorldStateMask.HasFlag(WorldState_Mask.WS_WEAPON_TYPE_LANCE) ? "Lance" : mWorld.mWorldStateMask.HasFlag(WorldState_Mask.WS_WEAPON_TYPE_HAMMER) ? "Hammer" : "Longsword");
-        foreach (var t in mWorld.plan)
+        if (mWorld.plan != null)
         {
-            UnityEngine.Debug.LogFormat("{0} Accumulated cost: {1}", t.MActionPlanning.mName, t.gCost);
+            UnityEngine.Debug.LogFormat("Plan length: {0}", mWorld.plan.Count);
+            foreach (NodePlanning_Mine nodePlanning in mWorld.plan)
+            {
+                UnityEngine.Debug.LogFormat("Action: {0}", nodePlanning.MActionPlanning);
+            }
+        }
+        else
+        {
+            UnityEngine.Debug.Log("Plan is null!");
         }
 
         return mWorld.plan;
@@ -133,27 +155,20 @@ public class Planning_Mine : MonoBehaviour
             // Set the weapon on the final state as the same as the initial state
             if ((initial.mWorldStateMask & WorldState_Mask.WS_WEAPON_TYPE_SWORD) != 0)
             {
-                final.mWorldStateMask |= WorldState_Mask.WS_WEAPON_TYPE_SWORD;
                 weapon = new Weapon(WeaponType.SWORD);
             }
             else if ((initial.mWorldStateMask & WorldState_Mask.WS_WEAPON_TYPE_LANCE) != 0)
             {
-                final.mWorldStateMask |= WorldState_Mask.WS_WEAPON_TYPE_LANCE;
                 weapon = new Weapon(WeaponType.LANCE);
             }
             else if ((initial.mWorldStateMask & WorldState_Mask.WS_WEAPON_TYPE_HAMMER) != 0)
             {
-                final.mWorldStateMask |= WorldState_Mask.WS_WEAPON_TYPE_HAMMER;
                 weapon = new Weapon(WeaponType.HAMMER);
             }
             else
             {
-                final.mWorldStateMask |= WorldState_Mask.WS_WEAPON_TYPE_LONGSWORD;
                 weapon = new Weapon(WeaponType.LONGSWORD);
             }
-            
-            // Action to equip the weapon
-            final.mWorldStateMask |= WorldState_Mask.WS_WEAPON_EQUIPPED;
         }
         // If the final state defines one, set it on the initial state
         else if ((final.mWorldStateMask & WorldState_Mask.WS_WEAPON_EQUIPPED) != 0)
@@ -207,16 +222,16 @@ public class Planning_Mine : MonoBehaviour
         {
             plan =
             FindFullPlan(initialNode, finalNode);
+            
+            //Log the plan then return it
+            UnityEngine.Debug.Log("--------------------");
+            UnityEngine.Debug.Log("PLAN FOUND!");
+            foreach (var t in plan)
+            {
+                UnityEngine.Debug.LogFormat("{0} Accumulated cost: {1}", t.MActionPlanning.mName, t.gCost);
+            }
         }
 
-        //Log the plan then return it
-        UnityEngine.Debug.Log("--------------------");
-        UnityEngine.Debug.Log("PLAN FOUND!");
-        foreach (var t in plan)
-        {
-            UnityEngine.Debug.LogFormat("{0} Accumulated cost: {1}", t.MActionPlanning.mName, t.gCost);
-        }
-        
         return plan;
         
     }
@@ -228,7 +243,6 @@ public class Planning_Mine : MonoBehaviour
         
         // Set the weapon and set the equipped and weapon flag on the initial state
         startNode.mWorldState.mWorldStateMask |= WorldState_Mask.WS_WEAPON_EQUIPPED;
-        
         // Create the 4 initial nodes
         NodePlanning_Mine longswordNode = new NodePlanning_Mine(new ActionPlanning_Mine(), startNode.mWorldState, ActionPlanning_Mine.ActionType.ACTION_TYPE_NONE, startNode.mWorldState.stamina,
             startNode.mWorldState.playerHealth, startNode.mWorldState.monsterHealth, new Weapon(WeaponType.LONGSWORD), startNode.mWorldState.monsterHealth);
@@ -237,10 +251,14 @@ public class Planning_Mine : MonoBehaviour
         NodePlanning_Mine swordNode = new NodePlanning_Mine(new ActionPlanning_Mine(), startNode.mWorldState, ActionPlanning_Mine.ActionType.ACTION_TYPE_NONE, startNode.mWorldState.stamina,
             startNode.mWorldState.playerHealth, startNode.mWorldState.monsterHealth, new Weapon(WeaponType.SWORD), startNode.mWorldState.monsterHealth);
         
+        // Unequip the sword
+        startNode.mWorldState.mWorldStateMask &= ~WorldState_Mask.WS_WEAPON_TYPE_SWORD;
         startNode.mWorldState.mWorldStateMask |= WorldState_Mask.WS_WEAPON_TYPE_LANCE;
         NodePlanning_Mine lanceNode = new NodePlanning_Mine(new ActionPlanning_Mine(), startNode.mWorldState, ActionPlanning_Mine.ActionType.ACTION_TYPE_NONE, startNode.mWorldState.stamina,
             startNode.mWorldState.playerHealth, startNode.mWorldState.monsterHealth, new Weapon(WeaponType.LANCE), startNode.mWorldState.monsterHealth);
         
+        // Unequip the lance
+        startNode.mWorldState.mWorldStateMask &= ~WorldState_Mask.WS_WEAPON_TYPE_LANCE;
         startNode.mWorldState.mWorldStateMask |= WorldState_Mask.WS_WEAPON_TYPE_HAMMER;
         NodePlanning_Mine hammerNode = new NodePlanning_Mine(new ActionPlanning_Mine(), startNode.mWorldState, ActionPlanning_Mine.ActionType.ACTION_TYPE_NONE, startNode.mWorldState.stamina,
             startNode.mWorldState.playerHealth, startNode.mWorldState.monsterHealth, new Weapon(WeaponType.HAMMER), startNode.mWorldState.monsterHealth);
@@ -312,9 +330,12 @@ public class Planning_Mine : MonoBehaviour
         // NodeB is the target node (the monster health we want to reach, the player health we want to have and the stamina we want to have)
         // NodeA is the current node (the monster health we have, the player health we have and the stamina we have)
         // The function should return a value between 0 and 100
-
+        */
+        
+        // TODO:
         // Monster health
-        int monsterHealthHeuristic = (goalNode.mWorldState.monsterHealth - nodeA.mWorldState.monsterHealth) * 100 / goalNode.mWorldState.monsterHealth;
+        int monsterHealthHeuristic =
+            ((goalNode.mWorldState.monsterHealth - nodeA.mWorldState.monsterHealth) * 100 / goalNode.mWorldState.monsterHealth) * heuristicWeight;
         // Player health
         int playerHealthHeuristic = (nodeA.mWorldState.playerHealth - goalNode.mWorldState.playerHealth) * 100 / nodeA.mWorldState.playerHealth;
         // Stamina
@@ -323,7 +344,7 @@ public class Planning_Mine : MonoBehaviour
         // 0 means that the node is exactly the same as the target node
         // 100 means that the node is the opposite of the target node
         return (int)(monsterHealthHeuristic * 0.7f + playerHealthHeuristic * 0.15f + staminaHeuristic * 0.15f);
-         */
+         
         
     }
 
