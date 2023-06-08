@@ -129,7 +129,7 @@ public class Planning_Mine : MonoBehaviour
             UnityEngine.Debug.LogFormat("Plan length: {0}", mWorld.plan.Count);
             foreach (NodePlanning_Mine nodePlanning in mWorld.plan)
             {
-                UnityEngine.Debug.LogFormat("Action: {0}", nodePlanning.MActionPlanning);
+                UnityEngine.Debug.LogFormat("Action: {0}", nodePlanning.MActionPlanning.mActionType);
             }
         }
         else
@@ -320,7 +320,7 @@ public class Planning_Mine : MonoBehaviour
         // The closer the monster health is to goalNode.health the smaller the heuristic
         // The range is monsterHealth - goalNode.health
         // Needs to be scaled to 20 (maximum health) and 0 (minimum health)
-        return nodeA.mWorldState.monsterCurrentHealth * heuristicWeight / nodeA.mWorldState.monsterHealth;
+        //return nodeA.mWorldState.monsterCurrentHealth * heuristicWeight / nodeA.mWorldState.monsterHealth;
         
         /*
          // The function weight should be determinated by:
@@ -343,7 +343,7 @@ public class Planning_Mine : MonoBehaviour
         // Weighted average
         // 0 means that the node is exactly the same as the target node
         // 100 means that the node is the opposite of the target node
-        return (int)(monsterHealthHeuristic * 0.7f + playerHealthHeuristic * 0.15f + staminaHeuristic * 0.15f);
+        return (int)(monsterHealthHeuristic * 0.7f + playerHealthHeuristic * 0.15f + staminaHeuristic * 0.15f) * heuristicWeight;
          
         
     }
